@@ -1,6 +1,33 @@
 "use client";
 
-import { useState, useRef, useCallback, useEffect } from "react";
+import { useState, useRef, useCallback } from "react";
+
+const PDFJS_VERSION = "4.9.155";
+const PDFJS_CDN = `https://cdnjs.cloudflare.com/ajax/libs/pdf.js/${PDFJS_VERSION}`;
+
+/* eslint-disable @typescript-eslint/no-explicit-any */
+function loadPdfJs(): Promise<any> {
+  return new Promise((resolve, reject) => {
+    if ((window as any).pdfjsLib) {
+      resolve((window as any).pdfjsLib);
+      return;
+    }
+    const script = document.createElement("script");
+    script.src = `${PDFJS_CDN}/pdf.min.js`;
+    script.onload = () => {
+      const lib = (window as any).pdfjsLib;
+      if (lib) {
+        lib.GlobalWorkerOptions.workerSrc = `${PDFJS_CDN}/pdf.worker.min.js`;
+        resolve(lib);
+      } else {
+        reject(new Error("pdfjsLib not found after script load"));
+      }
+    };
+    script.onerror = reject;
+    document.head.appendChild(script);
+  });
+}
+/* eslint-enable @typescript-eslint/no-explicit-any */
 
 interface ExtractedProduct {
   name: string;
@@ -37,8 +64,7 @@ export default function PdfImporter({ onProductsReady }: Props) {
 
     try {
       const arrayBuffer = await file.arrayBuffer();
-      const pdfjsLib = await import("pdfjs-dist");
-      pdfjsLib.GlobalWorkerOptions.workerSrc = `https://cdnjs.cloudflare.com/ajax/libs/pdf.js/${pdfjsLib.version}/pdf.worker.min.mjs`;
+      const pdfjsLib = await loadPdfJs();
 
       const pdf = await pdfjsLib.getDocument({ data: arrayBuffer }).promise;
       const pageImages: string[] = [];
@@ -53,7 +79,7 @@ export default function PdfImporter({ onProductsReady }: Props) {
         canvas.height = viewport.height;
         const ctx = canvas.getContext("2d")!;
 
-        await page.render({ canvasContext: ctx, viewport, canvas } as never).promise;
+        await page.render({ canvasContext: ctx, viewport }).promise;
         pageImages.push(canvas.toDataURL("image/jpeg", 0.85));
       }
 
