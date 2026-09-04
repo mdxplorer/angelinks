@@ -2,8 +2,7 @@
 
 import { useState, useRef, useCallback } from "react";
 
-const PDFJS_VERSION = "4.9.155";
-const PDFJS_CDN = `https://cdnjs.cloudflare.com/ajax/libs/pdf.js/${PDFJS_VERSION}`;
+const PDFJS_CDN = "https://cdn.jsdelivr.net/npm/pdfjs-dist@3.11.174/build";
 
 /* eslint-disable @typescript-eslint/no-explicit-any */
 function loadPdfJs(): Promise<any> {
@@ -20,10 +19,10 @@ function loadPdfJs(): Promise<any> {
         lib.GlobalWorkerOptions.workerSrc = `${PDFJS_CDN}/pdf.worker.min.js`;
         resolve(lib);
       } else {
-        reject(new Error("pdfjsLib not found after script load"));
+        reject(new Error("pdfjsLib not available"));
       }
     };
-    script.onerror = reject;
+    script.onerror = () => reject(new Error("Failed to load pdf.js from CDN"));
     document.head.appendChild(script);
   });
 }
@@ -84,8 +83,10 @@ export default function PdfImporter({ onProductsReady }: Props) {
       }
 
       setPages(pageImages);
-    } catch (error) {
-      console.error("Error processing PDF:", error);
+    } catch (error: unknown) {
+      const msg = error instanceof Error ? error.message : String(error);
+      console.error("Error processing PDF:", msg, error);
+      alert(`Error al procesar el PDF: ${msg}`);
     } finally {
       setLoading(false);
     }
