@@ -45,10 +45,10 @@ export default function DashboardPage() {
         <div className="max-w-6xl mx-auto px-4 py-4 flex items-center justify-between">
           <div className="flex items-center gap-3">
             <div className="w-10 h-10 bg-brand-600 rounded-xl flex items-center justify-center">
-              <span className="text-white font-bold text-sm">CL</span>
+              <span className="text-white font-bold text-sm">AL</span>
             </div>
             <div>
-              <h1 className="font-bold text-lg">CataLink</h1>
+              <h1 className="font-bold text-lg">AngeLinks</h1>
               <p className="text-xs text-gray-500">Panel de vendedor</p>
             </div>
           </div>

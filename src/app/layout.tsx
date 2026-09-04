@@ -2,9 +2,9 @@ import type { Metadata } from "next";
 import "./globals.css";
 
 export const metadata: Metadata = {
-  title: "CataLink — Tu catálogo, tus ventas",
+  title: "AngeLinks — Tu catálogo, tus ventas",
   description:
-    "Convierte cualquier catálogo en un link interactivo. Tus clientes piden, tú vendes.",
+    "Convierte cualquier catálogo en un link interactivo. Tus clientes piden, tú vendes. AngeLinks.",
 };
 
 export default function RootLayout({

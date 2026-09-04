@@ -20,7 +20,7 @@ export async function POST(req: NextRequest) {
           : "No se encontraron productos. Este catálogo puede usar un formato que requiere importación manual (PDF, iframe, JavaScript dinámico).",
     });
   } catch (error) {
-    console.error("[CataLink] Scrape error:", error);
+    console.error("[AngeLinks] Scrape error:", error);
     return NextResponse.json(
       {
         error: "No se pudo acceder a la URL. Verifica que sea correcta y accesible.",

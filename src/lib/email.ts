@@ -8,8 +8,8 @@ export async function sendOrderNotification(
   const resendKey = process.env.RESEND_API_KEY;
 
   if (!resendKey) {
-    console.log("[CataLink] Email skipped — RESEND_API_KEY not configured");
-    console.log("[CataLink] Order details:", JSON.stringify(order, null, 2));
+    console.log("[AngeLinks] Email skipped — RESEND_API_KEY not configured");
+    console.log("[AngeLinks] Order details:", JSON.stringify(order, null, 2));
     return false;
   }
 
@@ -28,7 +28,7 @@ export async function sendOrderNotification(
   const html = `
     <div style="font-family:system-ui,sans-serif;max-width:600px;margin:0 auto">
       <div style="background:linear-gradient(135deg,#16a34a,#15803d);color:white;padding:24px;border-radius:12px 12px 0 0">
-        <h1 style="margin:0;font-size:20px">Nuevo Pedido en CataLink</h1>
+        <h1 style="margin:0;font-size:20px">Nuevo Pedido en AngeLinks</h1>
         <p style="margin:8px 0 0;opacity:0.9">${catalog.name}</p>
       </div>
       <div style="background:#fff;padding:24px;border:1px solid #e5e7eb;border-top:none">
@@ -63,7 +63,7 @@ export async function sendOrderNotification(
         </div>
       </div>
       <div style="background:#f9fafb;padding:16px;border-radius:0 0 12px 12px;border:1px solid #e5e7eb;border-top:none;text-align:center">
-        <p style="margin:0;color:#9ca3af;font-size:12px">Enviado desde CataLink — Tu catálogo, tus ventas</p>
+        <p style="margin:0;color:#9ca3af;font-size:12px">Enviado desde AngeLinks — Tu catálogo, tus ventas</p>
       </div>
     </div>
   `;
@@ -72,14 +72,14 @@ export async function sendOrderNotification(
     const { Resend } = await import("resend");
     const resend = new Resend(resendKey);
     await resend.emails.send({
-      from: "CataLink <pedidos@catalink.app>",
+      from: "AngeLinks <pedidos@angelinks.app>",
       to: sellerEmail,
       subject: `Nuevo pedido de ${order.customer_name} — $${order.total.toLocaleString("es-CO")}`,
       html,
     });
     return true;
   } catch (error) {
-    console.error("[CataLink] Email error:", error);
+    console.error("[AngeLinks] Email error:", error);
     return false;
   }
 }

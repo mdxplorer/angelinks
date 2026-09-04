@@ -56,7 +56,7 @@ export async function POST(req: NextRequest) {
 
     return NextResponse.json({ order }, { status: 201 });
   } catch (error) {
-    console.error("[CataLink] Order error:", error);
+    console.error("[AngeLinks] Order error:", error);
     return NextResponse.json(
       { error: "Error al crear el pedido" },
       { status: 500 }

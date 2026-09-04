@@ -1,4 +1,4 @@
--- CataLink Database Schema
+-- AngeLinks Database Schema
 -- Run this in your Supabase SQL editor
 
 -- Enable UUID extension

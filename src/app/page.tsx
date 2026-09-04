@@ -8,9 +8,9 @@ export default function Home() {
         <nav className="max-w-6xl mx-auto px-4 py-5 flex items-center justify-between">
           <div className="flex items-center gap-2">
             <div className="w-9 h-9 bg-white/20 rounded-xl flex items-center justify-center backdrop-blur-sm">
-              <span className="text-white font-bold text-sm">CL</span>
+              <span className="text-white font-bold text-sm">AL</span>
             </div>
-            <span className="font-bold text-lg">CataLink</span>
+            <span className="font-bold text-lg">AngeLinks</span>
           </div>
           <div className="flex items-center gap-3">
             <Link
@@ -223,9 +223,9 @@ export default function Home() {
         <div className="max-w-6xl mx-auto px-4 flex flex-col sm:flex-row items-center justify-between gap-4">
           <div className="flex items-center gap-2">
             <div className="w-7 h-7 bg-brand-600 rounded-lg flex items-center justify-center">
-              <span className="text-white font-bold text-[10px]">CL</span>
+              <span className="text-white font-bold text-[10px]">AL</span>
             </div>
-            <span className="font-semibold text-sm">CataLink</span>
+            <span className="font-semibold text-sm">AngeLinks</span>
           </div>
           <p className="text-xs text-gray-400">
             Tu catálogo, tus ventas. Hecho para vendedores por catálogo en

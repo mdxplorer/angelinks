@@ -56,7 +56,7 @@ export default function NewCatalogPage() {
       imageDataUrl: string;
     }>
   ) => {
-    console.log("[CataLink] Products from PDF:", products);
+    console.log("[AngeLinks] Products from PDF:", products);
     alert(
       `Se extrajeron ${products.length} productos del PDF. En producción, estos se guardarían en Supabase.`
     );

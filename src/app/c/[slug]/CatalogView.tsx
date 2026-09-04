@@ -88,7 +88,7 @@ export default function CatalogView({ catalog, products, categories }: Props) {
             <div>
               <div className="flex items-center gap-2">
                 <div className="w-8 h-8 bg-brand-600 rounded-lg flex items-center justify-center">
-                  <span className="text-white text-xs font-bold">CL</span>
+                  <span className="text-white text-xs font-bold">AL</span>
                 </div>
                 <div>
                   <h1 className="font-bold text-base leading-tight">
@@ -206,7 +206,7 @@ export default function CatalogView({ catalog, products, categories }: Props) {
 
       {/* Powered by */}
       <footer className="text-center py-8 text-xs text-gray-400">
-        <p>Catálogo creado con CataLink</p>
+        <p>Catálogo creado con AngeLinks</p>
       </footer>
 
       {/* Cart Drawer */}
