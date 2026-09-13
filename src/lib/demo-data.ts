@@ -2,10 +2,10 @@ import type { Catalog, Product, Order, Seller } from "@/types";
 
 export const demoSeller: Seller = {
   id: "demo-seller-1",
-  name: "María García",
-  email: "maria@demo.com",
-  phone: "+57 300 123 4567",
-  created_at: new Date().toISOString(),
+  name: "Angela Restrepo",
+  email: "angela.restrepo@gmail.com",
+  phone: "+57 311 456 7890",
+  created_at: "2026-06-15T10:00:00.000Z",
 };
 
 export const demoCatalogs: Catalog[] = [
@@ -321,7 +321,179 @@ export const demoProducts: Product[] = [
   },
 ];
 
-let demoOrders: Order[] = [];
+function daysAgo(n: number): string {
+  const d = new Date();
+  d.setDate(d.getDate() - n);
+  d.setHours(Math.floor(Math.random() * 12) + 8, Math.floor(Math.random() * 60));
+  return d.toISOString();
+}
+
+let demoOrders: Order[] = [
+  {
+    id: "order-a1b2c3d4",
+    catalog_id: "cat-oboticario-1",
+    customer_name: "Carolina Méndez",
+    customer_phone: "+57 311 456 7890",
+    customer_address: "Cra 15 #82-10, Apto 402",
+    customer_city: "Bogotá",
+    customer_notes: "Entregar después de las 2pm",
+    total: 329700,
+    status: "delivered",
+    created_at: daysAgo(12),
+    items: [
+      { id: "item-1", order_id: "order-a1b2c3d4", product_id: "prod-2", product_name: "Egeo Dolce Woman EDP", quantity: 1, unit_price: 149900 },
+      { id: "item-2", order_id: "order-a1b2c3d4", product_id: "prod-9", product_name: "Lily EDP Feminino", quantity: 1, unit_price: 179900 },
+    ],
+  },
+  {
+    id: "order-e5f6g7h8",
+    catalog_id: "cat-oboticario-1",
+    customer_name: "Laura Valentina Torres",
+    customer_phone: "+57 320 987 6543",
+    customer_address: "Calle 45 #28-15",
+    customer_city: "Medellín",
+    customer_notes: "",
+    total: 239800,
+    status: "delivered",
+    created_at: daysAgo(10),
+    items: [
+      { id: "item-3", order_id: "order-e5f6g7h8", product_id: "prod-7", product_name: "Make B. Base Líquida HD", quantity: 1, unit_price: 79900 },
+      { id: "item-4", order_id: "order-e5f6g7h8", product_id: "prod-16", product_name: "Malbec Gold EDT", quantity: 1, unit_price: 189900 },
+    ],
+  },
+  {
+    id: "order-i9j0k1l2",
+    catalog_id: "cat-oboticario-1",
+    customer_name: "Daniela Ríos",
+    customer_phone: "+57 315 234 5678",
+    customer_address: "Av 6N #38-22, Casa 5",
+    customer_city: "Cali",
+    customer_notes: "Llamar antes de llegar",
+    total: 449700,
+    status: "delivered",
+    created_at: daysAgo(9),
+    items: [
+      { id: "item-5", order_id: "order-i9j0k1l2", product_id: "prod-9", product_name: "Lily EDP Feminino", quantity: 1, unit_price: 179900 },
+      { id: "item-6", order_id: "order-i9j0k1l2", product_id: "prod-14", product_name: "Egeo Choc Mint EDP", quantity: 1, unit_price: 149900 },
+      { id: "item-7", order_id: "order-i9j0k1l2", product_id: "prod-4", product_name: "Nativa SPA Karité Crema Corporal", quantity: 1, unit_price: 67900 },
+      { id: "item-8", order_id: "order-i9j0k1l2", product_id: "prod-8", product_name: "Make B. Máscara de Pestañas Ultra Black", quantity: 1, unit_price: 49900 },
+    ],
+  },
+  {
+    id: "order-m3n4o5p6",
+    catalog_id: "cat-oboticario-1",
+    customer_name: "Sofía Herrera",
+    customer_phone: "+57 318 111 2233",
+    customer_address: "Cra 7 #140-50",
+    customer_city: "Bogotá",
+    customer_notes: "",
+    total: 159900,
+    status: "delivered",
+    created_at: daysAgo(7),
+    items: [
+      { id: "item-9", order_id: "order-m3n4o5p6", product_id: "prod-20", product_name: "Kit Nativa SPA Ameixa Completo", quantity: 1, unit_price: 159900 },
+    ],
+  },
+  {
+    id: "order-q7r8s9t0",
+    catalog_id: "cat-oboticario-1",
+    customer_name: "Valentina Gómez",
+    customer_phone: "+57 300 555 6677",
+    customer_address: "Calle 100 #45-12, Apto 801",
+    customer_city: "Bogotá",
+    customer_notes: "Regalo. Empacar bonito por favor",
+    total: 284800,
+    status: "confirmed",
+    created_at: daysAgo(5),
+    items: [
+      { id: "item-10", order_id: "order-q7r8s9t0", product_id: "prod-3", product_name: "Malbec Desodorante Colônia", quantity: 1, unit_price: 134900 },
+      { id: "item-11", order_id: "order-q7r8s9t0", product_id: "prod-6", product_name: "Egeo Blue EDT Masculino", quantity: 1, unit_price: 119900 },
+    ],
+  },
+  {
+    id: "order-u1v2w3x4",
+    catalog_id: "cat-oboticario-1",
+    customer_name: "Andrea Castillo",
+    customer_phone: "+57 312 999 8877",
+    customer_address: "Cra 50 #10-25",
+    customer_city: "Barranquilla",
+    customer_notes: "",
+    total: 174800,
+    status: "confirmed",
+    created_at: daysAgo(3),
+    items: [
+      { id: "item-12", order_id: "order-u1v2w3x4", product_id: "prod-1", product_name: "Nativa SPA Quinoa Aceite Trifásico", quantity: 1, unit_price: 89900 },
+      { id: "item-13", order_id: "order-u1v2w3x4", product_id: "prod-17", product_name: "Make B. Paleta de Sombras 12 Tonos", quantity: 1, unit_price: 89900 },
+    ],
+  },
+  {
+    id: "order-y5z6a7b8",
+    catalog_id: "cat-oboticario-1",
+    customer_name: "Camila Duarte",
+    customer_phone: "+57 305 444 3322",
+    customer_address: "Calle 19 #4-88",
+    customer_city: "Bucaramanga",
+    customer_notes: "Dejar en portería",
+    total: 194800,
+    status: "pending",
+    created_at: daysAgo(2),
+    items: [
+      { id: "item-14", order_id: "order-y5z6a7b8", product_id: "prod-13", product_name: "Make B. Labial Líquido Matte", quantity: 2, unit_price: 44900 },
+      { id: "item-15", order_id: "order-y5z6a7b8", product_id: "prod-5", product_name: "Cuide-se Bem Candy Loción Corporal", quantity: 1, unit_price: 54900 },
+      { id: "item-16", order_id: "order-y5z6a7b8", product_id: "prod-10", product_name: "Nativa SPA Ameixa Body Splash", quantity: 1, unit_price: 44900 },
+    ],
+  },
+  {
+    id: "order-c9d0e1f2",
+    catalog_id: "cat-oboticario-1",
+    customer_name: "Isabella Moreno",
+    customer_phone: "+57 316 777 8899",
+    customer_address: "Av El Poblado #10-15, Torre 2",
+    customer_city: "Medellín",
+    customer_notes: "",
+    total: 269800,
+    status: "pending",
+    created_at: daysAgo(1),
+    items: [
+      { id: "item-17", order_id: "order-c9d0e1f2", product_id: "prod-2", product_name: "Egeo Dolce Woman EDP", quantity: 1, unit_price: 149900 },
+      { id: "item-18", order_id: "order-c9d0e1f2", product_id: "prod-11", product_name: "Floratta Blue EDP", quantity: 1, unit_price: 129900 },
+    ],
+  },
+  {
+    id: "order-g3h4i5j6",
+    catalog_id: "cat-oboticario-1",
+    customer_name: "Juliana Vargas",
+    customer_phone: "+57 321 222 3344",
+    customer_address: "Cra 43A #1-50",
+    customer_city: "Medellín",
+    customer_notes: "Segundo piso, timbre no funciona. Llamar.",
+    total: 399700,
+    status: "pending",
+    created_at: daysAgo(0),
+    items: [
+      { id: "item-19", order_id: "order-g3h4i5j6", product_id: "prod-16", product_name: "Malbec Gold EDT", quantity: 1, unit_price: 189900 },
+      { id: "item-20", order_id: "order-g3h4i5j6", product_id: "prod-19", product_name: "Zaad Arctic EDT Masculino", quantity: 1, unit_price: 159900 },
+      { id: "item-21", order_id: "order-g3h4i5j6", product_id: "prod-15", product_name: "Nativa SPA Quinoa Kit Viajero", quantity: 1, unit_price: 59900 },
+    ],
+  },
+  {
+    id: "order-k7l8m9n0",
+    catalog_id: "cat-oboticario-1",
+    customer_name: "Mariana López",
+    customer_phone: "+57 310 888 9900",
+    customer_address: "Calle 72 #10-07",
+    customer_city: "Bogotá",
+    customer_notes: "",
+    total: 124800,
+    status: "cancelled",
+    created_at: daysAgo(6),
+    items: [
+      { id: "item-22", order_id: "order-k7l8m9n0", product_id: "prod-12", product_name: "Cuide-se Bem Proteína de Arroz Shampoo", quantity: 1, unit_price: 39900 },
+      { id: "item-23", order_id: "order-k7l8m9n0", product_id: "prod-18", product_name: "Cuide-se Bem Leche de Cabra Jabón Corporal", quantity: 1, unit_price: 34900 },
+      { id: "item-24", order_id: "order-k7l8m9n0", product_id: "prod-8", product_name: "Make B. Máscara de Pestañas Ultra Black", quantity: 1, unit_price: 49900 },
+    ],
+  },
+];
 
 export function getDemoOrders(): Order[] {
   return demoOrders;

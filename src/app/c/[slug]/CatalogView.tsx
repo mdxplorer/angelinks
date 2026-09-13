@@ -6,6 +6,7 @@ import ProductCard from "@/components/ProductCard";
 import CartDrawer from "@/components/CartDrawer";
 import FloatingCart from "@/components/FloatingCart";
 import CheckoutModal from "@/components/CheckoutModal";
+import Logo from "@/components/Logo";
 
 interface Props {
   catalog: Catalog;
@@ -80,27 +81,25 @@ export default function CatalogView({ catalog, products, categories }: Props) {
   );
 
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="min-h-screen bg-warm-100">
       {/* Header */}
-      <header className="sticky top-0 z-20 bg-white/80 backdrop-blur-lg border-b border-gray-100">
+      <header className="sticky top-0 z-20 bg-white/80 backdrop-blur-lg border-b border-warm-200">
         <div className="max-w-7xl mx-auto px-4 py-3">
           <div className="flex items-center justify-between">
             <div>
               <div className="flex items-center gap-2">
-                <div className="w-8 h-8 bg-brand-600 rounded-lg flex items-center justify-center">
-                  <span className="text-white text-xs font-bold">AL</span>
-                </div>
+                <Logo size="sm" variant="icon" />
                 <div>
-                  <h1 className="font-bold text-base leading-tight">
+                  <h1 className="font-display font-bold text-base leading-tight text-warm-800">
                     {catalog.name}
                   </h1>
-                  <p className="text-xs text-gray-500">{catalog.brand}</p>
+                  <p className="text-xs text-warm-600">{catalog.brand}</p>
                 </div>
               </div>
             </div>
             <button
               onClick={() => setCartOpen(true)}
-              className="relative p-2.5 rounded-xl hover:bg-gray-100 transition-colors"
+              className="relative p-2.5 rounded-xl hover:bg-warm-200 transition-colors"
             >
               <svg
                 width="22"
@@ -115,7 +114,7 @@ export default function CatalogView({ catalog, products, categories }: Props) {
                 <path d="M1 1h4l2.68 13.39a2 2 0 002 1.61h9.72a2 2 0 002-1.61L23 6H6" />
               </svg>
               {totalItems > 0 && (
-                <span className="absolute -top-0.5 -right-0.5 bg-brand-600 text-white text-[10px] font-bold w-5 h-5 rounded-full flex items-center justify-center">
+                <span className="absolute -top-0.5 -right-0.5 bg-accent-500 text-white text-[10px] font-bold w-5 h-5 rounded-full flex items-center justify-center">
                   {totalItems}
                 </span>
               )}
@@ -125,7 +124,7 @@ export default function CatalogView({ catalog, products, categories }: Props) {
           {/* Search */}
           <div className="mt-3 relative">
             <svg
-              className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400"
+              className="absolute left-3 top-1/2 -translate-y-1/2 text-warm-400"
               width="16"
               height="16"
               viewBox="0 0 24 24"
@@ -141,7 +140,7 @@ export default function CatalogView({ catalog, products, categories }: Props) {
               placeholder="Buscar productos..."
               value={search}
               onChange={(e) => setSearch(e.target.value)}
-              className="w-full pl-10 pr-4 py-2.5 bg-gray-100 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-brand-500 focus:bg-white transition-all"
+              className="w-full pl-10 pr-4 py-2.5 bg-warm-100 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-accent-400 focus:bg-white transition-all"
             />
           </div>
 
@@ -151,8 +150,8 @@ export default function CatalogView({ catalog, products, categories }: Props) {
               onClick={() => setActiveCategory(null)}
               className={`px-3.5 py-1.5 rounded-full text-xs font-medium whitespace-nowrap transition-colors ${
                 !activeCategory
-                  ? "bg-brand-600 text-white"
-                  : "bg-gray-100 text-gray-600 hover:bg-gray-200"
+                  ? "bg-accent-500 text-white"
+                  : "bg-warm-200 text-warm-600 hover:bg-warm-300"
               }`}
             >
               Todos
@@ -165,8 +164,8 @@ export default function CatalogView({ catalog, products, categories }: Props) {
                 }
                 className={`px-3.5 py-1.5 rounded-full text-xs font-medium whitespace-nowrap transition-colors ${
                   activeCategory === cat
-                    ? "bg-brand-600 text-white"
-                    : "bg-gray-100 text-gray-600 hover:bg-gray-200"
+                    ? "bg-accent-500 text-white"
+                    : "bg-warm-200 text-warm-600 hover:bg-warm-300"
                 }`}
               >
                 {cat}
@@ -178,7 +177,7 @@ export default function CatalogView({ catalog, products, categories }: Props) {
 
       {/* Products Grid */}
       <main className="max-w-7xl mx-auto px-4 py-6">
-        <p className="text-sm text-gray-500 mb-4">
+        <p className="text-sm text-warm-600 mb-4">
           {filteredProducts.length}{" "}
           {filteredProducts.length === 1 ? "producto" : "productos"}
         </p>
@@ -196,8 +195,8 @@ export default function CatalogView({ catalog, products, categories }: Props) {
 
         {filteredProducts.length === 0 && (
           <div className="text-center py-16">
-            <p className="text-gray-400 text-lg">No hay productos</p>
-            <p className="text-gray-400 text-sm mt-1">
+            <p className="text-warm-500 text-lg">No hay productos</p>
+            <p className="text-warm-500 text-sm mt-1">
               Intenta con otra búsqueda
             </p>
           </div>
@@ -205,7 +204,7 @@ export default function CatalogView({ catalog, products, categories }: Props) {
       </main>
 
       {/* Powered by */}
-      <footer className="text-center py-8 text-xs text-gray-400">
+      <footer className="text-center py-8 text-xs text-warm-500">
         <p>Catálogo creado con AngeLinks</p>
       </footer>
 

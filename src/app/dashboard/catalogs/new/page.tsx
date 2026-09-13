@@ -1,259 +1,378 @@
 "use client";
 
-import { useState, type FormEvent } from "react";
+import { useState } from "react";
 import Link from "next/link";
-import dynamic from "next/dynamic";
+import { useRouter } from "next/navigation";
+import Logo from "@/components/Logo";
 
-const PdfImporter = dynamic(() => import("@/components/PdfImporter"), {
-  ssr: false,
-});
+const brands = [
+  { name: "O Boticário", color: "bg-secondary-100 text-secondary-700" },
+  { name: "Yanbal", color: "bg-purple-100 text-purple-700" },
+  { name: "Natura", color: "bg-amber-100 text-amber-700" },
+  { name: "Avon", color: "bg-pink-100 text-pink-700" },
+  { name: "Esika", color: "bg-blue-100 text-blue-700" },
+  { name: "Otra", color: "bg-warm-200 text-warm-700" },
+];
+
+const mockProducts = [
+  { name: "Egeo Dolce Woman EDP 90ml", price: 149900, category: "Perfumería", image: "https://images.unsplash.com/photo-1541643600914-78b084683601?w=200&q=80" },
+  { name: "Nativa SPA Quinoa Aceite Trifásico", price: 89900, category: "Cuidado Corporal", image: "https://images.unsplash.com/photo-1608248543803-ba4f8c70ae0b?w=200&q=80" },
+  { name: "Make B. Base Líquida HD 30ml", price: 79900, category: "Maquillaje", image: "https://images.unsplash.com/photo-1586495777744-4413f21062fa?w=200&q=80" },
+  { name: "Lily EDP Feminino 75ml", price: 179900, category: "Perfumería", image: "https://images.unsplash.com/photo-1588405748880-12d1d2a59f75?w=200&q=80" },
+  { name: "Cuide-se Bem Candy Loción 400ml", price: 54900, category: "Cuidado Corporal", image: "https://images.unsplash.com/photo-1556228578-0d85b1a4d571?w=200&q=80" },
+  { name: "Make B. Máscara Ultra Black 9ml", price: 49900, category: "Maquillaje", image: "https://images.unsplash.com/photo-1631214500115-598fc2cb8ada?w=200&q=80" },
+];
 
 export default function NewCatalogPage() {
-  const [activeTab, setActiveTab] = useState<"pdf" | "url" | "csv">("pdf");
-  const [scrapeUrl, setScrapeUrl] = useState("");
-  const [scraping, setScraping] = useState(false);
-  const [scrapeResult, setScrapeResult] = useState<{
-    products: Array<{
-      name: string;
-      price: number;
-      image_url: string;
-      description: string;
-    }>;
-    message: string;
-  } | null>(null);
+  const router = useRouter();
+  const [step, setStep] = useState(1);
+  const [creating, setCreating] = useState(false);
 
-  const handleScrape = async (e: FormEvent) => {
-    e.preventDefault();
-    if (!scrapeUrl) return;
+  const [catalog, setCatalog] = useState({
+    name: "",
+    brand: "",
+    customBrand: "",
+    description: "",
+  });
 
-    setScraping(true);
-    setScrapeResult(null);
+  const [importMethod, setImportMethod] = useState<"manual" | "pdf" | "url">("manual");
+  const [products, setProducts] = useState<typeof mockProducts>([]);
+  const [importing, setImporting] = useState(false);
 
-    try {
-      const res = await fetch("/api/scrape", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ url: scrapeUrl }),
-      });
-      const data = await res.json();
-      setScrapeResult(data);
-    } catch {
-      setScrapeResult({
-        products: [],
-        message: "Error al intentar escanear la URL",
-      });
-    } finally {
-      setScraping(false);
-    }
+  const selectedBrand = catalog.brand === "Otra" ? catalog.customBrand : catalog.brand;
+  const canProceedStep1 = catalog.name.trim() && selectedBrand;
+  const canProceedStep2 = products.length > 0;
+
+  const handleImport = async () => {
+    setImporting(true);
+    await new Promise((r) => setTimeout(r, 1800));
+    setProducts(mockProducts);
+    setImporting(false);
   };
 
-  const handlePdfProducts = (
-    products: Array<{
-      name: string;
-      price: number;
-      category: string;
-      description: string;
-      imageDataUrl: string;
-    }>
-  ) => {
-    console.log("[AngeLinks] Products from PDF:", products);
-    alert(
-      `Se extrajeron ${products.length} productos del PDF. En producción, estos se guardarían en Supabase.`
-    );
+  const removeProduct = (idx: number) => {
+    setProducts((prev) => prev.filter((_, i) => i !== idx));
   };
 
-  const tabs = [
-    { key: "pdf" as const, label: "Desde PDF", icon: "M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8zM14 2v6h6" },
-    { key: "url" as const, label: "Desde URL", icon: "M21 12a9 9 0 01-9 9m9-9a9 9 0 00-9-9m9 9H3m9 9a9 9 0 01-9-9m9 9c1.657 0 3-4.03 3-9s-1.343-9-3-9m0 18c-1.657 0-3-4.03-3-9s1.343-9 3-9" },
-    { key: "csv" as const, label: "Desde CSV", icon: "M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8zM14 2v6h6M12 18v-6M9 15h6" },
-  ];
+  const handleCreate = async () => {
+    setCreating(true);
+    await new Promise((r) => setTimeout(r, 2000));
+    router.push("/dashboard");
+  };
 
   return (
-    <div className="min-h-screen bg-gray-50">
-      <header className="bg-white border-b border-gray-100">
-        <div className="max-w-3xl mx-auto px-4 py-4 flex items-center gap-4">
-          <Link
-            href="/dashboard"
-            className="w-10 h-10 rounded-xl bg-gray-100 hover:bg-gray-200 flex items-center justify-center transition-colors"
-          >
-            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-              <path d="M19 12H5M12 19l-7-7 7-7" />
-            </svg>
-          </Link>
-          <div>
-            <h1 className="font-bold text-lg">Nuevo catálogo</h1>
-            <p className="text-xs text-gray-500">
-              Importa productos desde PDF, URL o CSV
-            </p>
+    <>
+      <header className="bg-white border-b border-warm-200">
+        <div className="max-w-2xl mx-auto px-4 py-4 flex items-center justify-between">
+          <div className="flex items-center gap-3">
+            <Link
+              href="/dashboard"
+              className="w-10 h-10 rounded-xl bg-warm-100 hover:bg-warm-200 flex items-center justify-center transition-colors"
+            >
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                <path d="M19 12H5M12 19l-7-7 7-7" />
+              </svg>
+            </Link>
+            <div>
+              <h1 className="font-display font-bold text-lg text-warm-800">Nuevo catálogo</h1>
+              <p className="text-xs text-warm-600">Paso {step} de 3</p>
+            </div>
           </div>
+          <Logo size="sm" variant="icon" />
         </div>
       </header>
 
-      <main className="max-w-3xl mx-auto px-4 py-8 space-y-6">
-        {/* Tabs */}
-        <div className="flex gap-2">
-          {tabs.map((tab) => (
-            <button
-              key={tab.key}
-              onClick={() => setActiveTab(tab.key)}
-              className={`flex items-center gap-2 px-5 py-3 rounded-xl text-sm font-medium transition-colors ${
-                activeTab === tab.key
-                  ? "bg-brand-600 text-white shadow-sm"
-                  : "bg-white text-gray-600 hover:bg-gray-100 border border-gray-200"
-              }`}
-            >
-              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                <path d={tab.icon} />
-              </svg>
-              {tab.label}
-            </button>
+      {/* Progress bar */}
+      <div className="max-w-2xl mx-auto px-4 pt-6">
+        <div className="flex items-center gap-2">
+          {[1, 2, 3].map((s) => (
+            <div key={s} className="flex-1 flex items-center gap-2">
+              <div className={`h-1.5 flex-1 rounded-full transition-colors ${s <= step ? "bg-accent-500" : "bg-warm-200"}`} />
+            </div>
           ))}
         </div>
+        <div className="flex justify-between mt-2 text-xs text-warm-600">
+          <span className={step === 1 ? "text-accent-600 font-medium" : ""}>Detalles</span>
+          <span className={step === 2 ? "text-accent-600 font-medium" : ""}>Productos</span>
+          <span className={step === 3 ? "text-accent-600 font-medium" : ""}>Revisar</span>
+        </div>
+      </div>
 
-        {/* PDF Tab */}
-        {activeTab === "pdf" && (
-          <section className="bg-white rounded-2xl p-6 shadow-sm border border-gray-100">
-            <div className="flex items-center gap-3 mb-5">
-              <div className="w-10 h-10 bg-brand-100 rounded-xl flex items-center justify-center">
-                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#16a34a" strokeWidth="2">
-                  <path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z" />
-                  <polyline points="14 2 14 8 20 8" />
-                </svg>
-              </div>
+      <main className="max-w-2xl mx-auto px-4 py-6 space-y-6">
+
+        {/* Step 1: Catalog Details */}
+        {step === 1 && (
+          <>
+            <div className="bg-white rounded-2xl shadow-sm border border-warm-200 p-6 space-y-5">
               <div>
-                <h2 className="font-semibold">Importar desde PDF</h2>
-                <p className="text-xs text-gray-500">
-                  Sube el catálogo en PDF, navega las páginas y selecciona cada
-                  producto con un rectángulo
-                </p>
+                <label className="block text-sm font-medium text-warm-700 mb-1.5">
+                  Nombre del catálogo *
+                </label>
+                <input
+                  type="text"
+                  value={catalog.name}
+                  onChange={(e) => setCatalog((p) => ({ ...p, name: e.target.value }))}
+                  placeholder="Ej: O Boticário - Temporada 10"
+                  className="w-full px-4 py-3 rounded-xl border border-warm-200 focus:outline-none focus:ring-2 focus:ring-accent-400 focus:border-transparent text-sm"
+                />
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-warm-700 mb-2">
+                  Marca *
+                </label>
+                <div className="grid grid-cols-3 gap-2">
+                  {brands.map((b) => (
+                    <button
+                      key={b.name}
+                      onClick={() => setCatalog((p) => ({ ...p, brand: b.name }))}
+                      className={`px-3 py-2.5 rounded-xl text-sm font-medium transition-all ${
+                        catalog.brand === b.name
+                          ? `${b.color} ring-2 ring-accent-400`
+                          : "bg-warm-50 text-warm-600 hover:bg-warm-100"
+                      }`}
+                    >
+                      {b.name}
+                    </button>
+                  ))}
+                </div>
+                {catalog.brand === "Otra" && (
+                  <input
+                    type="text"
+                    value={catalog.customBrand}
+                    onChange={(e) => setCatalog((p) => ({ ...p, customBrand: e.target.value }))}
+                    placeholder="Nombre de la marca"
+                    className="w-full mt-2 px-4 py-3 rounded-xl border border-warm-200 focus:outline-none focus:ring-2 focus:ring-accent-400 text-sm"
+                  />
+                )}
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-warm-700 mb-1.5">
+                  Descripción <span className="text-warm-500 font-normal">(opcional)</span>
+                </label>
+                <textarea
+                  value={catalog.description}
+                  onChange={(e) => setCatalog((p) => ({ ...p, description: e.target.value }))}
+                  placeholder="Describe brevemente tu catálogo para tus clientes..."
+                  rows={3}
+                  className="w-full px-4 py-3 rounded-xl border border-warm-200 focus:outline-none focus:ring-2 focus:ring-accent-400 text-sm resize-none"
+                />
               </div>
             </div>
-            <PdfImporter onProductsReady={handlePdfProducts} />
-          </section>
+
+            <button
+              onClick={() => setStep(2)}
+              disabled={!canProceedStep1}
+              className="w-full bg-accent-500 hover:bg-accent-600 disabled:bg-warm-300 disabled:cursor-not-allowed text-white font-semibold py-3.5 rounded-xl transition-colors text-base"
+            >
+              Siguiente — Agregar productos
+            </button>
+          </>
         )}
 
-        {/* URL Tab */}
-        {activeTab === "url" && (
-          <section className="bg-white rounded-2xl p-6 shadow-sm border border-gray-100">
-            <div className="flex items-center gap-3 mb-4">
-              <div className="w-10 h-10 bg-accent-100 rounded-xl flex items-center justify-center">
-                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#c026d3" strokeWidth="2">
-                  <path d="M21 12a9 9 0 01-9 9m9-9a9 9 0 00-9-9m9 9H3m9 9a9 9 0 01-9-9m9 9c1.657 0 3-4.03 3-9s-1.343-9-3-9m0 18c-1.657 0-3-4.03-3-9s1.343-9 3-9" />
-                </svg>
-              </div>
-              <div>
-                <h2 className="font-semibold">Importar desde URL</h2>
-                <p className="text-xs text-gray-500">
-                  Pega el link del catálogo web y extraemos los productos
-                  automáticamente
+        {/* Step 2: Import Products */}
+        {step === 2 && (
+          <>
+            {products.length === 0 ? (
+              <div className="bg-white rounded-2xl shadow-sm border border-warm-200 p-6 space-y-5">
+                <h2 className="font-display font-semibold text-warm-800">¿Cómo quieres agregar productos?</h2>
+
+                <div className="space-y-2">
+                  {[
+                    { key: "manual" as const, label: "Agregar manualmente", desc: "Escribe nombre, precio y sube foto de cada producto", icon: "M12 5v14M5 12h14" },
+                    { key: "pdf" as const, label: "Importar desde PDF", desc: "Sube el catálogo en PDF y selecciona productos", icon: "M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8zM14 2v6h6" },
+                    { key: "url" as const, label: "Importar desde URL", desc: "Pega el link del catálogo web", icon: "M10 13a5 5 0 007.54.54l3-3a5 5 0 00-7.07-7.07l-1.72 1.71M14 11a5 5 0 00-7.54-.54l-3 3a5 5 0 007.07 7.07l1.71-1.71" },
+                  ].map((m) => (
+                    <button
+                      key={m.key}
+                      onClick={() => setImportMethod(m.key)}
+                      className={`w-full flex items-center gap-4 p-4 rounded-xl text-left transition-all ${
+                        importMethod === m.key
+                          ? "bg-accent-50 border-2 border-accent-400"
+                          : "bg-warm-50 border-2 border-transparent hover:border-warm-200"
+                      }`}
+                    >
+                      <div className={`w-10 h-10 rounded-lg flex items-center justify-center flex-shrink-0 ${
+                        importMethod === m.key ? "bg-accent-100" : "bg-warm-200"
+                      }`}>
+                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke={importMethod === m.key ? "#E86550" : "#6B655C"} strokeWidth="2">
+                          <path d={m.icon} />
+                        </svg>
+                      </div>
+                      <div>
+                        <p className={`text-sm font-medium ${importMethod === m.key ? "text-accent-700" : "text-warm-800"}`}>{m.label}</p>
+                        <p className="text-xs text-warm-600">{m.desc}</p>
+                      </div>
+                    </button>
+                  ))}
+                </div>
+
+                <button
+                  onClick={handleImport}
+                  disabled={importing}
+                  className="w-full bg-accent-500 hover:bg-accent-600 disabled:bg-warm-300 text-white font-semibold py-3.5 rounded-xl transition-colors text-base flex items-center justify-center gap-2"
+                >
+                  {importing ? (
+                    <>
+                      <svg className="animate-spin h-5 w-5" viewBox="0 0 24 24" fill="none">
+                        <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
+                        <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z" />
+                      </svg>
+                      Importando productos...
+                    </>
+                  ) : (
+                    `Importar productos`
+                  )}
+                </button>
+
+                <p className="text-xs text-warm-500 text-center">
+                  En modo demo se cargan 6 productos de ejemplo
                 </p>
               </div>
-            </div>
+            ) : (
+              <div className="space-y-4">
+                <div className="flex items-center justify-between">
+                  <h2 className="font-display font-semibold text-warm-800">
+                    {products.length} productos importados
+                  </h2>
+                  <span className="text-xs bg-secondary-100 text-secondary-700 px-2.5 py-1 rounded-full font-medium">
+                    Listo
+                  </span>
+                </div>
 
-            <form onSubmit={handleScrape} className="flex gap-2">
-              <input
-                type="url"
-                value={scrapeUrl}
-                onChange={(e) => setScrapeUrl(e.target.value)}
-                placeholder="https://ejemplo.com/catalogo"
-                className="flex-1 px-4 py-3 rounded-xl border border-gray-200 focus:outline-none focus:ring-2 focus:ring-accent-500 text-sm"
-              />
-              <button
-                type="submit"
-                disabled={scraping}
-                className="bg-accent-600 hover:bg-accent-700 disabled:bg-gray-300 text-white font-medium px-5 py-3 rounded-xl transition-colors text-sm whitespace-nowrap"
-              >
-                {scraping ? "Escaneando..." : "Escanear"}
-              </button>
-            </form>
-
-            {scrapeResult && (
-              <div className="mt-4">
-                <p className="text-sm text-gray-600 mb-3">
-                  {scrapeResult.message}
-                </p>
-                {scrapeResult.products.length > 0 && (
-                  <div className="space-y-2 max-h-60 overflow-y-auto">
-                    {scrapeResult.products.map((p, i) => (
-                      <div
-                        key={i}
-                        className="flex items-center gap-3 p-3 bg-gray-50 rounded-xl text-sm"
-                      >
-                        {p.image_url && (
-                          <img src={p.image_url} alt="" className="w-10 h-10 rounded-lg object-cover" />
-                        )}
-                        <div className="flex-1 min-w-0">
-                          <p className="font-medium truncate">{p.name}</p>
-                          <p className="text-xs text-gray-500">
-                            ${p.price.toLocaleString("es-CO")}
-                          </p>
+                <div className="space-y-2">
+                  {products.map((p, i) => (
+                    <div key={i} className="bg-white rounded-xl p-3 shadow-sm border border-warm-200 flex items-center gap-3">
+                      <img src={p.image} alt={p.name} className="w-12 h-12 rounded-lg object-cover flex-shrink-0" />
+                      <div className="flex-1 min-w-0">
+                        <p className="text-sm font-medium text-warm-800 truncate">{p.name}</p>
+                        <div className="flex items-center gap-2 mt-0.5">
+                          <span className="text-sm font-bold text-accent-600">${p.price.toLocaleString("es-CO")}</span>
+                          <span className="text-xs text-warm-500">{p.category}</span>
                         </div>
                       </div>
-                    ))}
-                  </div>
-                )}
+                      <button
+                        onClick={() => removeProduct(i)}
+                        className="w-8 h-8 rounded-lg hover:bg-red-50 flex items-center justify-center text-warm-400 hover:text-red-500 transition-colors flex-shrink-0"
+                      >
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                          <path d="M18 6L6 18M6 6l12 12" />
+                        </svg>
+                      </button>
+                    </div>
+                  ))}
+                </div>
+
+                <button
+                  onClick={() => setStep(3)}
+                  disabled={!canProceedStep2}
+                  className="w-full bg-accent-500 hover:bg-accent-600 text-white font-semibold py-3.5 rounded-xl transition-colors text-base"
+                >
+                  Siguiente — Revisar catálogo
+                </button>
               </div>
             )}
 
-            <p className="text-xs text-gray-400 mt-3">
-              Funciona con catálogos HTML estándar. Para PDFs usa la pestaña
-              &quot;Desde PDF&quot;.
-            </p>
-          </section>
+            <button
+              onClick={() => setStep(1)}
+              className="w-full text-sm text-warm-600 hover:text-warm-800 font-medium py-2 transition-colors"
+            >
+              ← Volver a detalles
+            </button>
+          </>
         )}
 
-        {/* CSV Tab */}
-        {activeTab === "csv" && (
-          <section className="bg-white rounded-2xl p-6 shadow-sm border border-gray-100">
-            <div className="flex items-center gap-3 mb-4">
-              <div className="w-10 h-10 bg-blue-100 rounded-xl flex items-center justify-center">
-                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#3b82f6" strokeWidth="2">
-                  <path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z" />
-                  <polyline points="14 2 14 8 20 8" />
-                  <line x1="12" y1="18" x2="12" y2="12" />
-                  <line x1="9" y1="15" x2="15" y2="15" />
+        {/* Step 3: Review & Publish */}
+        {step === 3 && (
+          <>
+            <div className="bg-white rounded-2xl shadow-sm border border-warm-200 overflow-hidden">
+              {/* Catalog header preview */}
+              <div className="bg-gradient-to-br from-brand-300 to-brand-500 p-6 text-center">
+                <Logo size="sm" variant="icon" className="mx-auto mb-3 [&_img]:brightness-0 [&_img]:invert" />
+                <h2 className="font-display font-bold text-lg text-white">{catalog.name}</h2>
+                <p className="text-sm text-white/80 mt-1">{selectedBrand}</p>
+              </div>
+
+              {/* Stats preview */}
+              <div className="grid grid-cols-3 divide-x divide-warm-200 border-b border-warm-200">
+                <div className="p-4 text-center">
+                  <p className="text-2xl font-display font-bold text-warm-800">{products.length}</p>
+                  <p className="text-xs text-warm-600">Productos</p>
+                </div>
+                <div className="p-4 text-center">
+                  <p className="text-2xl font-display font-bold text-warm-800">
+                    {[...new Set(products.map((p) => p.category))].length}
+                  </p>
+                  <p className="text-xs text-warm-600">Categorías</p>
+                </div>
+                <div className="p-4 text-center">
+                  <p className="text-2xl font-display font-bold text-accent-600">
+                    ${Math.min(...products.map((p) => p.price)).toLocaleString("es-CO")}
+                  </p>
+                  <p className="text-xs text-warm-600">Desde</p>
+                </div>
+              </div>
+
+              {/* Product preview grid */}
+              <div className="p-4">
+                <p className="text-xs text-warm-600 mb-3 font-medium uppercase tracking-wider">Vista previa</p>
+                <div className="grid grid-cols-3 gap-2">
+                  {products.slice(0, 6).map((p, i) => (
+                    <div key={i} className="aspect-square rounded-lg overflow-hidden bg-warm-100">
+                      <img src={p.image} alt={p.name} className="w-full h-full object-cover" />
+                    </div>
+                  ))}
+                </div>
+              </div>
+
+              {/* Description */}
+              {catalog.description && (
+                <div className="px-4 pb-4">
+                  <p className="text-sm text-warm-600 italic">&ldquo;{catalog.description}&rdquo;</p>
+                </div>
+              )}
+            </div>
+
+            {/* Share preview */}
+            <div className="bg-white rounded-2xl shadow-sm border border-warm-200 p-5">
+              <p className="text-xs text-warm-600 mb-3 font-medium uppercase tracking-wider">Link para compartir</p>
+              <div className="flex items-center gap-2 bg-warm-50 rounded-xl p-3">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#6B655C" strokeWidth="2" className="flex-shrink-0">
+                  <path d="M10 13a5 5 0 007.54.54l3-3a5 5 0 00-7.07-7.07l-1.72 1.71" />
+                  <path d="M14 11a5 5 0 00-7.54-.54l-3 3a5 5 0 007.07 7.07l1.71-1.71" />
                 </svg>
-              </div>
-              <div>
-                <h2 className="font-semibold">Importar CSV</h2>
-                <p className="text-xs text-gray-500">
-                  Sube un archivo CSV con tus productos
-                </p>
+                <span className="text-sm text-warm-700 truncate">angelinks.co/c/{catalog.name.toLowerCase().replace(/\s+/g, "-").replace(/[^a-z0-9-]/g, "").slice(0, 30)}</span>
               </div>
             </div>
 
-            <div className="bg-gray-50 rounded-xl p-4 text-sm text-gray-600 space-y-2">
-              <p className="font-medium text-gray-700">Formato del CSV:</p>
-              <code className="block bg-gray-100 p-3 rounded-lg text-xs font-mono overflow-x-auto">
-                nombre,precio_catalogo,precio_venta,categoria,descripcion,imagen_url
-                <br />
-                &quot;Egeo Dolce EDP&quot;,149900,149900,&quot;Perfumería&quot;,&quot;Fragancia dulce 90ml&quot;,&quot;https://...&quot;
-              </code>
-            </div>
+            <button
+              onClick={handleCreate}
+              disabled={creating}
+              className="w-full bg-accent-500 hover:bg-accent-600 disabled:bg-warm-300 text-white font-semibold py-4 rounded-xl transition-colors text-base flex items-center justify-center gap-2"
+            >
+              {creating ? (
+                <>
+                  <svg className="animate-spin h-5 w-5" viewBox="0 0 24 24" fill="none">
+                    <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
+                    <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z" />
+                  </svg>
+                  Publicando catálogo...
+                </>
+              ) : (
+                "Publicar catálogo"
+              )}
+            </button>
 
-            <div className="mt-4 border-2 border-dashed border-gray-200 rounded-xl p-8 text-center">
-              <svg className="mx-auto mb-3 text-gray-400" width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5">
-                <path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4" />
-                <polyline points="17 8 12 3 7 8" />
-                <line x1="12" y1="3" x2="12" y2="15" />
-              </svg>
-              <p className="text-sm text-gray-500">
-                Arrastra tu CSV aquí o haz clic para seleccionar
-              </p>
-              <p className="text-xs text-gray-400 mt-1">.csv hasta 5MB</p>
-            </div>
-          </section>
+            <button
+              onClick={() => setStep(2)}
+              className="w-full text-sm text-warm-600 hover:text-warm-800 font-medium py-2 transition-colors"
+            >
+              ← Volver a productos
+            </button>
+          </>
         )}
-
-        {/* Demo mode notice */}
-        <div className="bg-amber-50 border border-amber-200 rounded-xl p-4 text-sm text-amber-800">
-          <p className="font-medium">Modo demo activo</p>
-          <p className="text-xs mt-1">
-            Estás en modo demo con datos de ejemplo. Para crear catálogos reales,
-            conecta Supabase configurando las variables de entorno.
-          </p>
-        </div>
       </main>
-    </div>
+    </>
   );
 }

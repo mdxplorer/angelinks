@@ -38,16 +38,16 @@ export default function CartDrawer({
           isOpen ? "translate-x-0" : "translate-x-full"
         }`}
       >
-        <div className="flex items-center justify-between p-5 border-b border-gray-100">
+        <div className="flex items-center justify-between p-5 border-b border-warm-200">
           <div>
-            <h2 className="text-lg font-bold">Tu pedido</h2>
-            <p className="text-sm text-gray-500">
+            <h2 className="text-lg font-display font-bold text-warm-800">Tu pedido</h2>
+            <p className="text-sm text-warm-600">
               {totalItems} {totalItems === 1 ? "producto" : "productos"}
             </p>
           </div>
           <button
             onClick={onClose}
-            className="w-10 h-10 rounded-xl bg-gray-100 hover:bg-gray-200 flex items-center justify-center transition-colors"
+            className="w-10 h-10 rounded-xl bg-warm-100 hover:bg-warm-200 flex items-center justify-center transition-colors"
           >
             <svg
               width="20"
@@ -64,7 +64,7 @@ export default function CartDrawer({
 
         <div className="flex-1 overflow-y-auto p-5 space-y-4">
           {items.length === 0 ? (
-            <div className="flex flex-col items-center justify-center h-full text-gray-400">
+            <div className="flex flex-col items-center justify-center h-full text-warm-500">
               <svg
                 width="48"
                 height="48"
@@ -84,7 +84,7 @@ export default function CartDrawer({
             items.map((item) => (
               <div
                 key={item.product.id}
-                className="flex gap-3 bg-gray-50 rounded-xl p-3"
+                className="flex gap-3 bg-warm-50 rounded-xl p-3"
               >
                 <img
                   src={item.product.image_url}
@@ -92,10 +92,10 @@ export default function CartDrawer({
                   className="w-16 h-16 rounded-lg object-cover flex-shrink-0"
                 />
                 <div className="flex-1 min-w-0">
-                  <h4 className="text-sm font-medium truncate">
+                  <h4 className="text-sm font-medium truncate text-warm-800">
                     {item.product.name}
                   </h4>
-                  <p className="text-sm font-bold text-brand-700 mt-1">
+                  <p className="text-sm font-bold text-accent-600 mt-1">
                     $
                     {(item.product.sale_price * item.quantity).toLocaleString(
                       "es-CO"
@@ -104,7 +104,7 @@ export default function CartDrawer({
                   <div className="flex items-center gap-2 mt-2">
                     <button
                       onClick={() => onUpdateQuantity(item.product.id, -1)}
-                      className="w-7 h-7 rounded-md bg-white border border-gray-200 flex items-center justify-center text-gray-500 hover:bg-gray-100 text-sm"
+                      className="w-7 h-7 rounded-md bg-white border border-warm-200 flex items-center justify-center text-warm-600 hover:bg-warm-100 text-sm"
                     >
                       −
                     </button>
@@ -113,7 +113,7 @@ export default function CartDrawer({
                     </span>
                     <button
                       onClick={() => onUpdateQuantity(item.product.id, 1)}
-                      className="w-7 h-7 rounded-md bg-white border border-gray-200 flex items-center justify-center text-gray-500 hover:bg-gray-100 text-sm"
+                      className="w-7 h-7 rounded-md bg-white border border-warm-200 flex items-center justify-center text-warm-600 hover:bg-warm-100 text-sm"
                     >
                       +
                     </button>
@@ -125,19 +125,19 @@ export default function CartDrawer({
         </div>
 
         {items.length > 0 && (
-          <div className="border-t border-gray-100 p-5 space-y-4">
+          <div className="border-t border-warm-200 p-5 space-y-4">
             <div className="flex justify-between items-center">
-              <span className="text-gray-600">Total</span>
-              <span className="text-2xl font-bold text-brand-700">
+              <span className="text-warm-600">Total</span>
+              <span className="text-2xl font-bold text-accent-600">
                 ${total.toLocaleString("es-CO")}
               </span>
             </div>
-            <p className="text-xs text-gray-500 text-center">
+            <p className="text-xs text-warm-600 text-center">
               Pago contraentrega — pagas cuando recibes
             </p>
             <button
               onClick={onCheckout}
-              className="w-full bg-brand-600 hover:bg-brand-700 text-white font-semibold py-3.5 rounded-xl transition-colors active:scale-[0.98] text-base"
+              className="w-full bg-accent-500 hover:bg-accent-600 text-white font-semibold py-3.5 rounded-xl transition-colors active:scale-[0.98] text-base"
             >
               Hacer pedido
             </button>

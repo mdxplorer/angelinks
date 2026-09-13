@@ -3,6 +3,7 @@
 import { useSearchParams } from "next/navigation";
 import { Suspense } from "react";
 import Link from "next/link";
+import Logo from "@/components/Logo";
 
 function SuccessContent() {
   const params = useSearchParams();
@@ -10,16 +11,16 @@ function SuccessContent() {
   const catalogSlug = params.get("catalog") || "";
 
   return (
-    <div className="min-h-screen bg-gradient-to-b from-brand-50 to-white flex items-center justify-center px-4">
+    <div className="min-h-screen bg-gradient-to-b from-secondary-50 to-warm-100 flex items-center justify-center px-4">
       <div className="max-w-md w-full text-center">
         {/* Success Animation */}
-        <div className="w-24 h-24 bg-brand-100 rounded-full flex items-center justify-center mx-auto mb-6 animate-bounce">
+        <div className="w-24 h-24 bg-secondary-100 rounded-full flex items-center justify-center mx-auto mb-6 animate-bounce">
           <svg
             width="48"
             height="48"
             viewBox="0 0 24 24"
             fill="none"
-            stroke="#16a34a"
+            stroke="#4D9B64"
             strokeWidth="2.5"
             strokeLinecap="round"
             strokeLinejoin="round"
@@ -28,56 +29,56 @@ function SuccessContent() {
           </svg>
         </div>
 
-        <h1 className="text-3xl font-bold text-gray-900 mb-2">
+        <h1 className="text-3xl font-display font-bold text-warm-900 mb-2">
           Pedido confirmado
         </h1>
-        <p className="text-gray-600 mb-6">
+        <p className="text-warm-600 mb-6">
           Tu pedido está en proceso. El vendedor te contactará pronto para
           coordinar la entrega.
         </p>
 
         {/* Order ID */}
-        <div className="bg-white rounded-2xl p-6 shadow-sm border border-gray-100 mb-6">
-          <p className="text-xs text-gray-500 uppercase tracking-wider mb-1">
+        <div className="bg-white rounded-2xl p-6 shadow-sm border border-warm-200 mb-6">
+          <p className="text-xs text-warm-600 uppercase tracking-wider mb-1">
             Número de pedido
           </p>
-          <p className="text-lg font-mono font-bold text-brand-700">
+          <p className="text-lg font-mono font-bold text-accent-600">
             {orderId.slice(0, 16)}
           </p>
         </div>
 
         {/* Info Cards */}
         <div className="space-y-3 mb-8">
-          <div className="bg-white rounded-xl p-4 shadow-sm border border-gray-100 flex items-start gap-3 text-left">
-            <div className="w-10 h-10 bg-blue-50 rounded-lg flex items-center justify-center flex-shrink-0">
+          <div className="bg-white rounded-xl p-4 shadow-sm border border-warm-200 flex items-start gap-3 text-left">
+            <div className="w-10 h-10 bg-brand-100 rounded-lg flex items-center justify-center flex-shrink-0">
               <svg
                 width="20"
                 height="20"
                 viewBox="0 0 24 24"
                 fill="none"
-                stroke="#3b82f6"
+                stroke="#C17D63"
                 strokeWidth="2"
               >
                 <path d="M22 16.92v3a2 2 0 01-2.18 2 19.79 19.79 0 01-8.63-3.07 19.5 19.5 0 01-6-6 19.79 19.79 0 01-3.07-8.67A2 2 0 014.11 2h3a2 2 0 012 1.72 12.84 12.84 0 00.7 2.81 2 2 0 01-.45 2.11L8.09 9.91a16 16 0 006 6l1.27-1.27a2 2 0 012.11-.45 12.84 12.84 0 002.81.7A2 2 0 0122 16.92z" />
               </svg>
             </div>
             <div>
-              <p className="text-sm font-medium">Te contactarán pronto</p>
-              <p className="text-xs text-gray-500">
+              <p className="text-sm font-medium text-warm-800">Te contactarán pronto</p>
+              <p className="text-xs text-warm-600">
                 El vendedor te escribirá por WhatsApp o te llamará para
                 confirmar detalles.
               </p>
             </div>
           </div>
 
-          <div className="bg-white rounded-xl p-4 shadow-sm border border-gray-100 flex items-start gap-3 text-left">
-            <div className="w-10 h-10 bg-green-50 rounded-lg flex items-center justify-center flex-shrink-0">
+          <div className="bg-white rounded-xl p-4 shadow-sm border border-warm-200 flex items-start gap-3 text-left">
+            <div className="w-10 h-10 bg-secondary-100 rounded-lg flex items-center justify-center flex-shrink-0">
               <svg
                 width="20"
                 height="20"
                 viewBox="0 0 24 24"
                 fill="none"
-                stroke="#16a34a"
+                stroke="#4D9B64"
                 strokeWidth="2"
               >
                 <rect x="1" y="3" width="15" height="13" />
@@ -87,8 +88,8 @@ function SuccessContent() {
               </svg>
             </div>
             <div>
-              <p className="text-sm font-medium">Pago contraentrega</p>
-              <p className="text-xs text-gray-500">
+              <p className="text-sm font-medium text-warm-800">Pago contraentrega</p>
+              <p className="text-xs text-warm-600">
                 Pagas al recibir tu pedido. Sin anticipos.
               </p>
             </div>
@@ -98,7 +99,7 @@ function SuccessContent() {
         {catalogSlug && (
           <Link
             href={`/c/${catalogSlug}`}
-            className="inline-flex items-center gap-2 text-brand-600 hover:text-brand-700 font-medium text-sm transition-colors"
+            className="inline-flex items-center gap-2 text-accent-600 hover:text-accent-700 font-medium text-sm transition-colors"
           >
             <svg
               width="16"
@@ -113,6 +114,10 @@ function SuccessContent() {
             Volver al catálogo
           </Link>
         )}
+
+        <div className="mt-8">
+          <Logo size="sm" className="justify-center" />
+        </div>
       </div>
     </div>
   );
@@ -123,7 +128,7 @@ export default function OrderSuccessPage() {
     <Suspense
       fallback={
         <div className="min-h-screen flex items-center justify-center">
-          <div className="animate-spin h-8 w-8 border-4 border-brand-600 border-t-transparent rounded-full" />
+          <div className="animate-spin h-8 w-8 border-4 border-accent-500 border-t-transparent rounded-full" />
         </div>
       }
     >

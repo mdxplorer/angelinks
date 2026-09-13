@@ -4,7 +4,7 @@ import "./globals.css";
 export const metadata: Metadata = {
   title: "AngeLinks — Tu catálogo, tus ventas",
   description:
-    "Convierte cualquier catálogo en un link interactivo. Tus clientes piden, tú vendes. AngeLinks.",
+    "Convierte cualquier catálogo de belleza en un link interactivo. Tus clientes piden, tú vendes. AngeLinks.",
 };
 
 export default function RootLayout({
@@ -14,7 +14,7 @@ export default function RootLayout({
 }) {
   return (
     <html lang="es">
-      <body className="font-sans antialiased bg-gray-50 text-gray-900">
+      <body className="font-sans antialiased bg-warm-100 text-warm-700">
         {children}
       </body>
     </html>

@@ -82,17 +82,17 @@ export default function CheckoutModal({
       />
       <div className="fixed inset-x-0 bottom-0 z-50 sm:inset-auto sm:top-1/2 sm:left-1/2 sm:-translate-x-1/2 sm:-translate-y-1/2 sm:max-w-lg sm:w-full">
         <div className="bg-white rounded-t-3xl sm:rounded-2xl max-h-[90vh] overflow-y-auto">
-          <div className="sticky top-0 bg-white px-6 pt-6 pb-4 border-b border-gray-100 rounded-t-3xl sm:rounded-t-2xl">
+          <div className="sticky top-0 bg-white px-6 pt-6 pb-4 border-b border-warm-200 rounded-t-3xl sm:rounded-t-2xl">
             <div className="flex items-center justify-between">
               <div>
-                <h2 className="text-xl font-bold">Confirmar pedido</h2>
-                <p className="text-sm text-gray-500 mt-0.5">
+                <h2 className="text-xl font-display font-bold text-warm-800">Confirmar pedido</h2>
+                <p className="text-sm text-warm-600 mt-0.5">
                   Pago contraentrega — pagas al recibir
                 </p>
               </div>
               <button
                 onClick={onClose}
-                className="w-10 h-10 rounded-xl bg-gray-100 hover:bg-gray-200 flex items-center justify-center"
+                className="w-10 h-10 rounded-xl bg-warm-100 hover:bg-warm-200 flex items-center justify-center"
               >
                 <svg
                   width="20"
@@ -110,16 +110,16 @@ export default function CheckoutModal({
 
           <form onSubmit={handleSubmit} className="p-6 space-y-4">
             {/* Order Summary */}
-            <div className="bg-gray-50 rounded-xl p-4 space-y-2">
+            <div className="bg-warm-50 rounded-xl p-4 space-y-2">
               {cart.map((item) => (
                 <div
                   key={item.product.id}
                   className="flex justify-between text-sm"
                 >
-                  <span className="text-gray-600">
+                  <span className="text-warm-600">
                     {item.quantity}x {item.product.name}
                   </span>
-                  <span className="font-medium">
+                  <span className="font-medium text-warm-800">
                     $
                     {(item.product.sale_price * item.quantity).toLocaleString(
                       "es-CO"
@@ -127,9 +127,9 @@ export default function CheckoutModal({
                   </span>
                 </div>
               ))}
-              <div className="border-t border-gray-200 pt-2 flex justify-between">
-                <span className="font-bold">Total</span>
-                <span className="font-bold text-brand-700 text-lg">
+              <div className="border-t border-warm-200 pt-2 flex justify-between">
+                <span className="font-bold text-warm-800">Total</span>
+                <span className="font-bold text-accent-600 text-lg">
                   ${total.toLocaleString("es-CO")}
                 </span>
               </div>
@@ -137,7 +137,7 @@ export default function CheckoutModal({
 
             {/* Customer Info */}
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1.5">
+              <label className="block text-sm font-medium text-warm-700 mb-1.5">
                 Nombre completo *
               </label>
               <input
@@ -146,12 +146,12 @@ export default function CheckoutModal({
                 value={form.name}
                 onChange={(e) => update("name", e.target.value)}
                 placeholder="Tu nombre"
-                className="w-full px-4 py-3 rounded-xl border border-gray-200 focus:outline-none focus:ring-2 focus:ring-brand-500 focus:border-transparent text-sm"
+                className="w-full px-4 py-3 rounded-xl border border-warm-200 focus:outline-none focus:ring-2 focus:ring-accent-400 focus:border-transparent text-sm"
               />
             </div>
 
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1.5">
+              <label className="block text-sm font-medium text-warm-700 mb-1.5">
                 WhatsApp / Teléfono *
               </label>
               <input
@@ -160,12 +160,12 @@ export default function CheckoutModal({
                 value={form.phone}
                 onChange={(e) => update("phone", e.target.value)}
                 placeholder="300 123 4567"
-                className="w-full px-4 py-3 rounded-xl border border-gray-200 focus:outline-none focus:ring-2 focus:ring-brand-500 focus:border-transparent text-sm"
+                className="w-full px-4 py-3 rounded-xl border border-warm-200 focus:outline-none focus:ring-2 focus:ring-accent-400 focus:border-transparent text-sm"
               />
             </div>
 
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1.5">
+              <label className="block text-sm font-medium text-warm-700 mb-1.5">
                 Ciudad *
               </label>
               <input
@@ -174,12 +174,12 @@ export default function CheckoutModal({
                 value={form.city}
                 onChange={(e) => update("city", e.target.value)}
                 placeholder="Ej: Bogotá, Medellín, Cali..."
-                className="w-full px-4 py-3 rounded-xl border border-gray-200 focus:outline-none focus:ring-2 focus:ring-brand-500 focus:border-transparent text-sm"
+                className="w-full px-4 py-3 rounded-xl border border-warm-200 focus:outline-none focus:ring-2 focus:ring-accent-400 focus:border-transparent text-sm"
               />
             </div>
 
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1.5">
+              <label className="block text-sm font-medium text-warm-700 mb-1.5">
                 Dirección de entrega *
               </label>
               <input
@@ -188,12 +188,12 @@ export default function CheckoutModal({
                 value={form.address}
                 onChange={(e) => update("address", e.target.value)}
                 placeholder="Dirección completa"
-                className="w-full px-4 py-3 rounded-xl border border-gray-200 focus:outline-none focus:ring-2 focus:ring-brand-500 focus:border-transparent text-sm"
+                className="w-full px-4 py-3 rounded-xl border border-warm-200 focus:outline-none focus:ring-2 focus:ring-accent-400 focus:border-transparent text-sm"
               />
             </div>
 
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1.5">
+              <label className="block text-sm font-medium text-warm-700 mb-1.5">
                 Notas adicionales
               </label>
               <textarea
@@ -201,14 +201,14 @@ export default function CheckoutModal({
                 onChange={(e) => update("notes", e.target.value)}
                 placeholder="Indicaciones especiales, horario de entrega, etc."
                 rows={2}
-                className="w-full px-4 py-3 rounded-xl border border-gray-200 focus:outline-none focus:ring-2 focus:ring-brand-500 focus:border-transparent text-sm resize-none"
+                className="w-full px-4 py-3 rounded-xl border border-warm-200 focus:outline-none focus:ring-2 focus:ring-accent-400 focus:border-transparent text-sm resize-none"
               />
             </div>
 
             <button
               type="submit"
               disabled={loading}
-              className="w-full bg-brand-600 hover:bg-brand-700 disabled:bg-gray-300 disabled:cursor-not-allowed text-white font-semibold py-4 rounded-xl transition-colors text-base mt-2"
+              className="w-full bg-accent-500 hover:bg-accent-600 disabled:bg-warm-300 disabled:cursor-not-allowed text-white font-semibold py-4 rounded-xl transition-colors text-base mt-2"
             >
               {loading ? (
                 <span className="flex items-center justify-center gap-2">
@@ -238,7 +238,7 @@ export default function CheckoutModal({
               )}
             </button>
 
-            <p className="text-center text-xs text-gray-400 mt-2">
+            <p className="text-center text-xs text-warm-500 mt-2">
               Al confirmar, el vendedor recibirá tu pedido y te contactará para
               coordinar la entrega.
             </p>

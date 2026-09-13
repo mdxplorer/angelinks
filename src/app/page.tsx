@@ -1,48 +1,53 @@
 import Link from "next/link";
+import Logo from "@/components/Logo";
+import BrandPattern from "@/components/BrandPattern";
 
 export default function Home() {
   return (
     <div className="min-h-screen">
       {/* Hero */}
-      <div className="bg-gradient-to-br from-brand-600 via-brand-700 to-brand-900 text-white">
-        <nav className="max-w-6xl mx-auto px-4 py-5 flex items-center justify-between">
-          <div className="flex items-center gap-2">
-            <div className="w-9 h-9 bg-white/20 rounded-xl flex items-center justify-center backdrop-blur-sm">
-              <span className="text-white font-bold text-sm">AL</span>
-            </div>
-            <span className="font-bold text-lg">AngeLinks</span>
-          </div>
+      <div className="relative bg-gradient-to-b from-warm-50 via-warm-100 to-brand-100 overflow-hidden">
+        <BrandPattern className="text-brand-400" opacity={0.06} />
+
+        <nav className="relative max-w-6xl mx-auto px-4 py-5 flex items-center justify-between">
+          <Logo size="md" />
           <div className="flex items-center gap-3">
             <Link
-              href="/dashboard"
-              className="text-sm text-white/80 hover:text-white transition-colors"
-            >
-              Dashboard
-            </Link>
-            <Link
               href="/c/oboticario-t9-sep"
-              className="bg-white text-brand-700 text-sm font-semibold px-4 py-2 rounded-xl hover:bg-white/90 transition-colors"
+              className="text-sm text-warm-600 hover:text-warm-800 transition-colors hidden sm:inline"
             >
               Ver demo
+            </Link>
+            <Link
+              href="/auth/login"
+              className="text-sm text-warm-700 hover:text-warm-900 font-medium transition-colors"
+            >
+              Iniciar sesión
+            </Link>
+            <Link
+              href="/auth/register"
+              className="bg-accent-500 text-white text-sm font-semibold px-4 py-2 rounded-xl hover:bg-accent-600 transition-colors"
+            >
+              Crear cuenta
             </Link>
           </div>
         </nav>
 
-        <div className="max-w-6xl mx-auto px-4 py-20 lg:py-28 text-center">
-          <div className="inline-flex items-center gap-2 bg-white/10 backdrop-blur-sm rounded-full px-4 py-1.5 mb-6">
-            <span className="w-2 h-2 bg-green-400 rounded-full animate-pulse" />
-            <span className="text-sm text-white/90">
+        <div className="relative max-w-6xl mx-auto px-4 py-20 lg:py-28 text-center">
+          <div className="inline-flex items-center gap-2 bg-secondary-100 rounded-full px-4 py-1.5 mb-6">
+            <span className="w-2 h-2 bg-secondary-500 rounded-full animate-pulse" />
+            <span className="text-sm text-secondary-700 font-medium">
               Contraentrega — sin riesgo para ti
             </span>
           </div>
 
-          <h1 className="text-4xl sm:text-5xl lg:text-6xl font-extrabold leading-tight max-w-4xl mx-auto">
+          <h1 className="font-display text-4xl sm:text-5xl lg:text-6xl font-extrabold leading-tight max-w-4xl mx-auto text-warm-900" style={{ textWrap: "balance" }}>
             Tu catálogo en un link.
             <br />
-            <span className="text-brand-200">Tus clientes piden fácil.</span>
+            <span className="text-accent-600">Tus clientes piden fácil.</span>
           </h1>
 
-          <p className="mt-6 text-lg text-white/80 max-w-2xl mx-auto leading-relaxed">
+          <p className="mt-6 text-lg text-warm-600 max-w-2xl mx-auto leading-relaxed">
             Convierte catálogos de O Boticário, Yanbal, Natura o cualquier marca
             en un link interactivo. Compártelo por WhatsApp. Recibe pedidos al
             instante.
@@ -50,16 +55,16 @@ export default function Home() {
 
           <div className="mt-10 flex flex-col sm:flex-row gap-4 justify-center">
             <Link
-              href="/c/oboticario-t9-sep"
-              className="bg-white text-brand-700 font-semibold px-8 py-4 rounded-2xl text-base hover:bg-white/90 transition-colors shadow-lg shadow-black/10"
+              href="/auth/register"
+              className="bg-accent-500 text-white font-semibold px-8 py-4 rounded-2xl text-base hover:bg-accent-600 transition-colors shadow-lg shadow-accent-500/20"
             >
-              Ver catálogo demo
+              Crear mi catálogo gratis
             </Link>
             <Link
-              href="/dashboard"
-              className="bg-white/10 backdrop-blur-sm text-white font-semibold px-8 py-4 rounded-2xl text-base hover:bg-white/20 transition-colors border border-white/20"
+              href="/c/oboticario-t9-sep"
+              className="bg-white text-warm-700 font-semibold px-8 py-4 rounded-2xl text-base hover:bg-white/80 transition-colors border border-warm-200"
             >
-              Crear mi catálogo
+              Ver demo primero
             </Link>
           </div>
         </div>
@@ -67,10 +72,10 @@ export default function Home() {
 
       {/* How it works */}
       <section className="max-w-6xl mx-auto px-4 py-20">
-        <h2 className="text-3xl font-bold text-center mb-4">
+        <h2 className="font-display text-3xl font-bold text-center mb-4 text-warm-900">
           ¿Cómo funciona?
         </h2>
-        <p className="text-center text-gray-500 mb-12 max-w-xl mx-auto">
+        <p className="text-center text-warm-600 mb-12 max-w-xl mx-auto">
           Tres pasos para maximizar tus ventas por catálogo
         </p>
 
@@ -82,7 +87,7 @@ export default function Home() {
                 height="28"
                 viewBox="0 0 24 24"
                 fill="none"
-                stroke="#16a34a"
+                stroke="#C17D63"
                 strokeWidth="2"
               >
                 <path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4" />
@@ -90,11 +95,11 @@ export default function Home() {
                 <line x1="12" y1="3" x2="12" y2="15" />
               </svg>
             </div>
-            <div className="inline-flex items-center justify-center w-8 h-8 bg-brand-600 text-white text-sm font-bold rounded-full mb-3">
+            <div className="inline-flex items-center justify-center w-8 h-8 bg-brand-400 text-warm-900 text-sm font-display font-bold rounded-full mb-3">
               1
             </div>
-            <h3 className="font-semibold text-lg mb-2">Sube tus productos</h3>
-            <p className="text-gray-500 text-sm leading-relaxed">
+            <h3 className="font-display font-semibold text-lg mb-2 text-warm-800">Sube tus productos</h3>
+            <p className="text-warm-600 text-sm leading-relaxed">
               Importa desde URL, CSV, o agrégalos manualmente. Pon precios del
               catálogo y tus precios de venta.
             </p>
@@ -107,42 +112,42 @@ export default function Home() {
                 height="28"
                 viewBox="0 0 24 24"
                 fill="none"
-                stroke="#c026d3"
+                stroke="#E86550"
                 strokeWidth="2"
               >
                 <path d="M10 13a5 5 0 007.54.54l3-3a5 5 0 00-7.07-7.07l-1.72 1.71" />
                 <path d="M14 11a5 5 0 00-7.54-.54l-3 3a5 5 0 007.07 7.07l1.71-1.71" />
               </svg>
             </div>
-            <div className="inline-flex items-center justify-center w-8 h-8 bg-accent-600 text-white text-sm font-bold rounded-full mb-3">
+            <div className="inline-flex items-center justify-center w-8 h-8 bg-accent-500 text-white text-sm font-bold rounded-full mb-3">
               2
             </div>
-            <h3 className="font-semibold text-lg mb-2">Comparte el link</h3>
-            <p className="text-gray-500 text-sm leading-relaxed">
+            <h3 className="font-display font-semibold text-lg mb-2 text-warm-800">Comparte el link</h3>
+            <p className="text-warm-600 text-sm leading-relaxed">
               Te generamos un link único de tu catálogo interactivo.
               Compártelo por WhatsApp, Instagram, donde quieras.
             </p>
           </div>
 
           <div className="text-center">
-            <div className="w-16 h-16 bg-blue-100 rounded-2xl flex items-center justify-center mx-auto mb-4">
+            <div className="w-16 h-16 bg-secondary-100 rounded-2xl flex items-center justify-center mx-auto mb-4">
               <svg
                 width="28"
                 height="28"
                 viewBox="0 0 24 24"
                 fill="none"
-                stroke="#3b82f6"
+                stroke="#4D9B64"
                 strokeWidth="2"
               >
                 <path d="M22 11.08V12a10 10 0 11-5.93-9.14" />
                 <polyline points="22 4 12 14.01 9 11.01" />
               </svg>
             </div>
-            <div className="inline-flex items-center justify-center w-8 h-8 bg-blue-600 text-white text-sm font-bold rounded-full mb-3">
+            <div className="inline-flex items-center justify-center w-8 h-8 bg-secondary-500 text-white text-sm font-bold rounded-full mb-3">
               3
             </div>
-            <h3 className="font-semibold text-lg mb-2">Recibe pedidos</h3>
-            <p className="text-gray-500 text-sm leading-relaxed">
+            <h3 className="font-display font-semibold text-lg mb-2 text-warm-800">Recibe pedidos</h3>
+            <p className="text-warm-600 text-sm leading-relaxed">
               Tus clientes eligen productos y hacen pedido. Te llega al correo
               con todos los detalles. Cobras contraentrega.
             </p>
@@ -151,9 +156,10 @@ export default function Home() {
       </section>
 
       {/* Benefits */}
-      <section className="bg-gray-900 text-white py-20">
-        <div className="max-w-6xl mx-auto px-4">
-          <h2 className="text-3xl font-bold text-center mb-12">
+      <section className="relative bg-warm-900 text-white py-20 overflow-hidden">
+        <BrandPattern className="text-brand-400" opacity={0.08} />
+        <div className="relative max-w-6xl mx-auto px-4">
+          <h2 className="font-display text-3xl font-bold text-center mb-12">
             Vende más, trabaja menos
           </h2>
           <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-6">
@@ -179,9 +185,9 @@ export default function Home() {
                 desc: "O Boticário, Yanbal, Natura, Avon... todas tus marcas en un solo lugar.",
               },
             ].map((b, i) => (
-              <div key={i} className="bg-white/5 rounded-2xl p-6 backdrop-blur-sm">
+              <div key={i} className="bg-white/10 rounded-2xl p-6 backdrop-blur-sm">
                 <svg
-                  className="text-brand-400 mb-4"
+                  className="text-accent-200 mb-4"
                   width="28"
                   height="28"
                   viewBox="0 0 24 24"
@@ -191,8 +197,8 @@ export default function Home() {
                 >
                   <path d={b.icon} />
                 </svg>
-                <h3 className="font-semibold mb-1">{b.title}</h3>
-                <p className="text-sm text-gray-400 leading-relaxed">
+                <h3 className="font-display font-semibold mb-1">{b.title}</h3>
+                <p className="text-sm text-warm-400 leading-relaxed">
                   {b.desc}
                 </p>
               </div>
@@ -203,31 +209,32 @@ export default function Home() {
 
       {/* CTA */}
       <section className="max-w-6xl mx-auto px-4 py-20 text-center">
-        <h2 className="text-3xl font-bold mb-4">
+        <h2 className="font-display text-3xl font-bold mb-4 text-warm-900">
           Empieza a vender hoy
         </h2>
-        <p className="text-gray-500 mb-8 max-w-lg mx-auto">
+        <p className="text-warm-600 mb-8 max-w-lg mx-auto">
           Sin suscripción, sin comisiones, sin complicaciones. Tu catálogo, tus
           ventas, tu negocio.
         </p>
         <Link
-          href="/dashboard"
-          className="inline-flex bg-brand-600 hover:bg-brand-700 text-white font-semibold px-8 py-4 rounded-2xl text-base transition-colors shadow-lg shadow-brand-600/20"
+          href="/auth/register"
+          className="inline-flex bg-accent-500 hover:bg-accent-600 text-white font-semibold px-8 py-4 rounded-2xl text-base transition-colors shadow-lg shadow-accent-500/20"
         >
           Crear mi primer catálogo
         </Link>
+        <p className="mt-4 text-sm text-warm-600">
+          ¿Ya tienes cuenta?{" "}
+          <Link href="/auth/login" className="text-accent-600 hover:text-accent-700 font-medium transition-colors">
+            Inicia sesión
+          </Link>
+        </p>
       </section>
 
       {/* Footer */}
-      <footer className="border-t border-gray-100 py-8">
+      <footer className="border-t border-warm-200 py-8">
         <div className="max-w-6xl mx-auto px-4 flex flex-col sm:flex-row items-center justify-between gap-4">
-          <div className="flex items-center gap-2">
-            <div className="w-7 h-7 bg-brand-600 rounded-lg flex items-center justify-center">
-              <span className="text-white font-bold text-[10px]">AL</span>
-            </div>
-            <span className="font-semibold text-sm">AngeLinks</span>
-          </div>
-          <p className="text-xs text-gray-400">
+          <Logo size="sm" />
+          <p className="text-xs text-warm-500">
             Tu catálogo, tus ventas. Hecho para vendedores por catálogo en
             Colombia.
           </p>
