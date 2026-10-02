@@ -4,6 +4,8 @@ import { sendOrderNotification } from "@/lib/email";
 import { createClient } from "@supabase/supabase-js";
 
 export async function POST(req: NextRequest) {
+  let order;
+
   try {
     const body = await req.json();
 
@@ -32,7 +34,7 @@ export async function POST(req: NextRequest) {
       );
     }
 
-    const order = await createOrder({
+    order = await createOrder({
       catalog_id,
       customer_name,
       customer_phone,
@@ -42,8 +44,15 @@ export async function POST(req: NextRequest) {
       total,
       items,
     });
+  } catch (error) {
+    console.error("[AngeLinks] Order creation error:", error);
+    const msg = error instanceof Error ? error.message : "Error al crear el pedido";
+    return NextResponse.json({ error: msg }, { status: 500 });
+  }
 
-    // Find catalog + seller email for notification
+  // Notification — separate try-catch so order still succeeds
+  let seller: { name: string; whatsapp: string } | null = null;
+  try {
     const serviceKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
     const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
     if (serviceKey && supabaseUrl) {
@@ -51,7 +60,7 @@ export async function POST(req: NextRequest) {
       const { data: catalog } = await admin
         .from("catalogs")
         .select("*")
-        .eq("id", catalog_id)
+        .eq("id", order.catalog_id)
         .single();
 
       if (catalog) {
@@ -61,25 +70,19 @@ export async function POST(req: NextRequest) {
           .eq("id", catalog.seller_id)
           .single();
 
-        if (profile?.email) {
-          await sendOrderNotification(order, catalog, profile.email);
+        if (profile) {
+          seller = { name: profile.name, whatsapp: profile.whatsapp };
+          if (profile.email) {
+            await sendOrderNotification(order, catalog, profile.email);
+          }
         }
-
-        return NextResponse.json({
-          order,
-          seller: profile ? { name: profile.name, whatsapp: profile.whatsapp } : null,
-        }, { status: 201 });
       }
     }
-
-    return NextResponse.json({ order, seller: null }, { status: 201 });
-  } catch (error) {
-    console.error("[AngeLinks] Order error:", error);
-    return NextResponse.json(
-      { error: "Error al crear el pedido" },
-      { status: 500 }
-    );
+  } catch (err) {
+    console.error("[AngeLinks] Notification error (order still created):", err);
   }
+
+  return NextResponse.json({ order, seller }, { status: 201 });
 }
 
 export async function GET(req: NextRequest) {

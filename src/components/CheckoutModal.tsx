@@ -58,7 +58,10 @@ export default function CheckoutModal({
         }),
       });
 
-      if (!res.ok) throw new Error("Error al crear pedido");
+      if (!res.ok) {
+        const errData = await res.json().catch(() => null);
+        throw new Error(errData?.error || `Error ${res.status}`);
+      }
 
       const data = await res.json();
       const params = new URLSearchParams({
@@ -70,8 +73,9 @@ export default function CheckoutModal({
       if (data.seller?.whatsapp) params.set("wa", data.seller.whatsapp);
       if (data.seller?.name) params.set("seller", data.seller.name);
       router.push(`/order-success?${params.toString()}`);
-    } catch {
-      alert("Hubo un error al procesar tu pedido. Intenta de nuevo.");
+    } catch (err) {
+      const msg = err instanceof Error ? err.message : "Error desconocido";
+      alert(`Hubo un error al procesar tu pedido: ${msg}`);
     } finally {
       setLoading(false);
     }

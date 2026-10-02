@@ -12,7 +12,7 @@ export default function FloatingCart({ itemCount, total, onClick }: Props) {
   return (
     <button
       onClick={onClick}
-      className="fixed bottom-6 right-6 z-30 bg-accent-500 hover:bg-accent-600 text-white rounded-2xl px-5 py-3.5 shadow-lg shadow-accent-500/30 flex items-center gap-3 transition-all active:scale-95 hover:shadow-xl"
+      className="fixed bottom-20 right-4 z-30 bg-accent-500 hover:bg-accent-600 text-white rounded-2xl px-5 py-3.5 shadow-lg shadow-accent-500/30 flex items-center gap-3 transition-all active:scale-95 hover:shadow-xl"
     >
       <div className="relative">
         <svg
