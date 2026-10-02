@@ -61,9 +61,15 @@ export default function CheckoutModal({
       if (!res.ok) throw new Error("Error al crear pedido");
 
       const data = await res.json();
-      router.push(
-        `/order-success?order=${data.order.id}&catalog=${catalogSlug}`
-      );
+      const params = new URLSearchParams({
+        order: data.order.id,
+        catalog: catalogSlug,
+        total: total.toString(),
+        customer: form.name,
+      });
+      if (data.seller?.whatsapp) params.set("wa", data.seller.whatsapp);
+      if (data.seller?.name) params.set("seller", data.seller.name);
+      router.push(`/order-success?${params.toString()}`);
     } catch {
       alert("Hubo un error al procesar tu pedido. Intenta de nuevo.");
     } finally {

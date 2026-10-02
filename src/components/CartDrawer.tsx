@@ -86,11 +86,19 @@ export default function CartDrawer({
                 key={item.product.id}
                 className="flex gap-3 bg-warm-50 rounded-xl p-3"
               >
-                <img
-                  src={item.product.image_url}
-                  alt={item.product.name}
-                  className="w-16 h-16 rounded-lg object-cover flex-shrink-0"
-                />
+                {item.product.image_url ? (
+                  <img
+                    src={item.product.image_url}
+                    alt={item.product.name}
+                    className="w-16 h-16 rounded-lg object-cover flex-shrink-0"
+                  />
+                ) : (
+                  <div className="w-16 h-16 rounded-lg bg-warm-200 flex items-center justify-center flex-shrink-0">
+                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#B5AFA6" strokeWidth="1.5">
+                      <path d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4" />
+                    </svg>
+                  </div>
+                )}
                 <div className="flex-1 min-w-0">
                   <h4 className="text-sm font-medium truncate text-warm-800">
                     {item.product.name}

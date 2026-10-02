@@ -50,16 +50,29 @@ export async function POST(req: NextRequest) {
       const admin = createClient(supabaseUrl, serviceKey);
       const { data: catalog } = await admin
         .from("catalogs")
-        .select("*, seller:profiles!seller_id(email)")
+        .select("*")
         .eq("id", catalog_id)
         .single();
 
-      if (catalog?.seller?.email) {
-        await sendOrderNotification(order, catalog, catalog.seller.email);
+      if (catalog) {
+        const { data: profile } = await admin
+          .from("profiles")
+          .select("email, whatsapp, name")
+          .eq("id", catalog.seller_id)
+          .single();
+
+        if (profile?.email) {
+          await sendOrderNotification(order, catalog, profile.email);
+        }
+
+        return NextResponse.json({
+          order,
+          seller: profile ? { name: profile.name, whatsapp: profile.whatsapp } : null,
+        }, { status: 201 });
       }
     }
 
-    return NextResponse.json({ order }, { status: 201 });
+    return NextResponse.json({ order, seller: null }, { status: 201 });
   } catch (error) {
     console.error("[AngeLinks] Order error:", error);
     return NextResponse.json(
