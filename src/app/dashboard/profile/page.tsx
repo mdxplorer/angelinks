@@ -1,33 +1,89 @@
 "use client";
 
-import { useState, useCallback } from "react";
+import { useState, useCallback, useEffect } from "react";
 import Link from "next/link";
 import Avatar from "@/components/shared/Avatar";
 import Toast from "@/components/shared/Toast";
+import { useAuth } from "@/components/auth/AuthProvider";
+import { getSupabaseBrowser } from "@/lib/supabase-browser";
 
 export default function ProfilePage() {
+  const { user, profile, refreshProfile } = useAuth();
   const [saving, setSaving] = useState(false);
-  const [toast, setToast] = useState({ visible: false, message: "", type: "success" as const });
+  const [loaded, setLoaded] = useState(false);
+  const [toast, setToast] = useState({ visible: false, message: "", type: "success" as "success" | "error" });
   const [form, setForm] = useState({
-    name: "Angela Restrepo",
-    email: "angela.restrepo@gmail.com",
-    phone: "+57 311 456 7890",
-    businessName: "Belleza con Ange",
-    city: "Bogotá",
-    bio: "Consultora independiente de O Boticário y Yanbal. Más de 3 años ayudando a mis clientas a encontrar su fragancia perfecta y los mejores productos de cuidado personal. ¡Escríbeme por WhatsApp!",
-    instagram: "@bellezaconange",
-    whatsapp: "+57 311 456 7890",
+    name: "",
+    email: "",
+    phone: "",
+    businessName: "",
+    city: "",
+    bio: "",
+    instagram: "",
+    whatsapp: "",
   });
+
+  useEffect(() => {
+    if (loaded) return;
+    if (profile) {
+      setForm({
+        name: profile.name || "",
+        email: profile.email || user?.email || "",
+        phone: profile.phone || "",
+        businessName: profile.business_name || "",
+        city: profile.city || "",
+        bio: profile.bio || "",
+        instagram: profile.instagram || "",
+        whatsapp: profile.whatsapp || profile.phone || "",
+      });
+      setLoaded(true);
+    } else if (user) {
+      setForm((prev) => ({
+        ...prev,
+        name: user.user_metadata?.name || "",
+        email: user.email || "",
+        phone: user.user_metadata?.phone || "",
+        whatsapp: user.user_metadata?.phone || "",
+      }));
+      setLoaded(true);
+    }
+  }, [profile, user, loaded]);
 
   const update = (field: string, value: string) =>
     setForm((prev) => ({ ...prev, [field]: value }));
 
   const handleSave = useCallback(async () => {
+    if (!user) return;
     setSaving(true);
-    await new Promise((r) => setTimeout(r, 1200));
+
+    const supabase = getSupabaseBrowser();
+    const profileData = {
+      id: user.id,
+      name: form.name,
+      email: form.email,
+      phone: form.phone,
+      business_name: form.businessName,
+      city: form.city,
+      bio: form.bio,
+      instagram: form.instagram,
+      whatsapp: form.whatsapp,
+      updated_at: new Date().toISOString(),
+    };
+
+    const { error } = await supabase
+      .from("profiles")
+      .upsert(profileData, { onConflict: "id" });
+
     setSaving(false);
+
+    if (error) {
+      setToast({ visible: true, message: "Error al guardar: " + error.message, type: "error" });
+      return;
+    }
+
+    await refreshProfile();
     setToast({ visible: true, message: "Perfil guardado correctamente", type: "success" });
-  }, []);
+  }, [user, form, refreshProfile]);
 
   const closeToast = useCallback(() => {
     setToast((prev) => ({ ...prev, visible: false }));
@@ -55,16 +111,13 @@ export default function ProfilePage() {
       <main className="max-w-2xl mx-auto px-4 py-8 space-y-6">
         {/* Avatar Section */}
         <div className="bg-white rounded-2xl shadow-sm border border-warm-200 p-6 flex flex-col items-center gap-4">
-          <Avatar name={form.name} size="xl" />
+          <Avatar name={form.name || "U"} size="xl" />
           <div className="text-center">
             <p className="font-display font-bold text-lg text-warm-800">{form.name || "Tu nombre"}</p>
             <p className="text-sm text-warm-600">
               {form.businessName || "Vendedora por catálogo"}
             </p>
           </div>
-          <button className="text-sm text-accent-600 hover:text-accent-700 font-medium transition-colors">
-            Cambiar foto
-          </button>
         </div>
 
         {/* Personal Info */}
@@ -92,10 +145,11 @@ export default function ProfilePage() {
                 id="profile-email"
                 type="email"
                 value={form.email}
-                onChange={(e) => update("email", e.target.value)}
-                className="w-full px-4 py-3 rounded-xl border border-warm-200 focus:outline-none focus:ring-2 focus:ring-accent-400 focus:border-transparent text-sm"
+                disabled
+                className="w-full px-4 py-3 rounded-xl border border-warm-200 bg-warm-50 text-warm-500 text-sm cursor-not-allowed"
                 placeholder="tu@correo.com"
               />
+              <p className="text-xs text-warm-500 mt-1">El correo no se puede cambiar</p>
             </div>
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               <div>

@@ -3,6 +3,7 @@
 import { useState, type FormEvent } from "react";
 import Link from "next/link";
 import AuthInput from "@/components/auth/AuthInput";
+import { getSupabaseBrowser } from "@/lib/supabase-browser";
 
 export default function ForgotPasswordPage() {
   const [loading, setLoading] = useState(false);
@@ -22,7 +23,19 @@ export default function ForgotPasswordPage() {
     }
     setError("");
     setLoading(true);
-    await new Promise((r) => setTimeout(r, 1500));
+
+    const supabase = getSupabaseBrowser();
+    const { error: resetError } = await supabase.auth.resetPasswordForEmail(email, {
+      redirectTo: `${window.location.origin}/auth/reset-password`,
+    });
+
+    setLoading(false);
+
+    if (resetError) {
+      setError(resetError.message);
+      return;
+    }
+
     setSent(true);
   };
 

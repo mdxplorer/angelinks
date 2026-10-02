@@ -19,6 +19,7 @@
     "resend": "^4.1.0"
   },
   "devDependencies": {
+    "@netlify/plugin-nextjs": "^5.16.1",
     "@types/node": "^22.0.0",
     "@types/react": "^19.0.0",
     "@types/react-dom": "^19.0.0",

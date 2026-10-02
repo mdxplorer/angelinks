@@ -5,6 +5,7 @@ import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import Logo from "@/components/Logo";
 import Avatar from "@/components/shared/Avatar";
+import { useAuth } from "@/components/auth/AuthProvider";
 
 const navItems = [
   { href: "/dashboard", label: "Inicio", icon: "M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6", exact: true },
@@ -16,8 +17,15 @@ const navItems = [
 export default function DashboardLayout({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
   const router = useRouter();
+  const { user, profile, loading, signOut } = useAuth();
   const [menuOpen, setMenuOpen] = useState(false);
   const menuRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    if (!loading && !user) {
+      router.replace("/auth/login");
+    }
+  }, [loading, user, router]);
 
   useEffect(() => {
     function handleClick(e: MouseEvent) {
@@ -29,11 +37,41 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
     return () => document.removeEventListener("mousedown", handleClick);
   }, []);
 
+  const displayName =
+    profile?.name ||
+    user?.user_metadata?.name ||
+    user?.email?.split("@")[0] ||
+    "Usuario";
+
+  const businessName =
+    profile?.business_name ||
+    "";
+
+  if (loading || !user) {
+    return (
+      <div className="min-h-screen bg-warm-100 flex items-center justify-center">
+        <div className="flex flex-col items-center gap-3">
+          <svg className="animate-spin h-8 w-8 text-accent-500" viewBox="0 0 24 24" fill="none">
+            <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
+            <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z" />
+          </svg>
+          <p className="text-sm text-warm-500">Cargando...</p>
+        </div>
+      </div>
+    );
+  }
+
   const isActive = (href: string, exact?: boolean) =>
     exact ? pathname === href : pathname.startsWith(href);
 
   const isSubPage = pathname !== "/dashboard" &&
     !navItems.some((item) => item.href !== "/dashboard" && pathname === item.href);
+
+  const handleSignOut = async () => {
+    setMenuOpen(false);
+    await signOut();
+    router.push("/");
+  };
 
   return (
     <div className="min-h-screen bg-warm-100">
@@ -84,7 +122,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
                 onClick={() => setMenuOpen(!menuOpen)}
                 className="flex items-center gap-2 p-1 rounded-xl hover:bg-warm-100 transition-colors"
               >
-                <Avatar name="Angela Restrepo" size="sm" />
+                <Avatar name={displayName} size="sm" />
                 <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="hidden sm:block text-warm-500">
                   <path d="M6 9l6 6 6-6" />
                 </svg>
@@ -93,8 +131,13 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
               {menuOpen && (
                 <div className="absolute right-0 mt-2 w-56 bg-white rounded-xl shadow-lg border border-warm-200 py-1 z-50">
                   <div className="px-4 py-3 border-b border-warm-100">
-                    <p className="text-sm font-medium text-warm-800">Angela Restrepo</p>
-                    <p className="text-xs text-warm-500">Belleza con Ange</p>
+                    <p className="text-sm font-medium text-warm-800">{displayName}</p>
+                    {businessName && (
+                      <p className="text-xs text-warm-500">{businessName}</p>
+                    )}
+                    {!businessName && user?.email && (
+                      <p className="text-xs text-warm-500 truncate">{user.email}</p>
+                    )}
                   </div>
 
                   <Link
@@ -123,10 +166,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
 
                   <div className="border-t border-warm-100 mt-1 pt-1">
                     <button
-                      onClick={() => {
-                        setMenuOpen(false);
-                        router.push("/");
-                      }}
+                      onClick={handleSignOut}
                       className="flex items-center gap-3 px-4 py-2.5 text-sm text-red-600 hover:bg-red-50 transition-colors w-full text-left"
                     >
                       <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">

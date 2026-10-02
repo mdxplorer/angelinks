@@ -3,6 +3,7 @@
 import Link from "next/link";
 import Logo from "@/components/Logo";
 import Avatar from "@/components/shared/Avatar";
+import { useAuth } from "@/components/auth/AuthProvider";
 
 interface DashboardHeaderProps {
   title?: string;
@@ -15,6 +16,14 @@ export default function DashboardHeader({
   showBack = false,
   backHref = "/dashboard",
 }: DashboardHeaderProps) {
+  const { user, profile } = useAuth();
+
+  const displayName =
+    profile?.name ||
+    user?.user_metadata?.name ||
+    user?.email?.split("@")[0] ||
+    "Usuario";
+
   return (
     <header className="bg-white border-b border-warm-200">
       <div className="max-w-6xl mx-auto px-4 py-4 flex items-center justify-between">
@@ -44,8 +53,10 @@ export default function DashboardHeader({
           href="/dashboard/profile"
           className="flex items-center gap-2 hover:bg-warm-100 rounded-xl px-2 py-1.5 transition-colors"
         >
-          <Avatar name="María García" size="sm" />
-          <span className="text-sm font-medium text-warm-700 hidden sm:inline">María</span>
+          <Avatar name={displayName} size="sm" />
+          <span className="text-sm font-medium text-warm-700 hidden sm:inline">
+            {displayName.split(" ")[0]}
+          </span>
         </Link>
       </div>
     </header>

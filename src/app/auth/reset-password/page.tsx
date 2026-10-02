@@ -3,6 +3,7 @@
 import { useState, type FormEvent } from "react";
 import Link from "next/link";
 import AuthInput from "@/components/auth/AuthInput";
+import { getSupabaseBrowser } from "@/lib/supabase-browser";
 
 export default function ResetPasswordPage() {
   const [loading, setLoading] = useState(false);
@@ -24,7 +25,19 @@ export default function ResetPasswordPage() {
     e.preventDefault();
     if (!validate()) return;
     setLoading(true);
-    await new Promise((r) => setTimeout(r, 1500));
+
+    const supabase = getSupabaseBrowser();
+    const { error } = await supabase.auth.updateUser({
+      password: form.password,
+    });
+
+    setLoading(false);
+
+    if (error) {
+      setErrors({ password: error.message });
+      return;
+    }
+
     setDone(true);
   };
 

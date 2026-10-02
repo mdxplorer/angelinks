@@ -6,12 +6,14 @@ import Link from "next/link";
 import AuthInput from "@/components/auth/AuthInput";
 import SocialButton from "@/components/auth/SocialButton";
 import AuthDivider from "@/components/auth/AuthDivider";
+import { getSupabaseBrowser } from "@/lib/supabase-browser";
 
 export default function RegisterPage() {
   const router = useRouter();
   const [loading, setLoading] = useState(false);
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [toast, setToast] = useState<string | null>(null);
+  const [confirmEmail, setConfirmEmail] = useState(false);
   const [form, setForm] = useState({
     name: "",
     email: "",
@@ -39,22 +41,96 @@ export default function RegisterPage() {
     e.preventDefault();
     if (!validate()) return;
     setLoading(true);
-    await new Promise((r) => setTimeout(r, 1500));
-    setToast("¡Cuenta creada! Bienvenida a AngeLinks");
-    setTimeout(() => router.push("/dashboard"), 1200);
+
+    const supabase = getSupabaseBrowser();
+    const { data, error } = await supabase.auth.signUp({
+      email: form.email,
+      password: form.password,
+      options: {
+        data: {
+          name: form.name,
+          phone: form.phone,
+        },
+        emailRedirectTo: `${window.location.origin}/auth/callback`,
+      },
+    });
+
+    setLoading(false);
+
+    if (error) {
+      if (error.message.includes("already registered")) {
+        setErrors({ email: "Este correo ya tiene una cuenta. Inicia sesión." });
+      } else {
+        setErrors({ email: error.message });
+      }
+      return;
+    }
+
+    if (data.session) {
+      setToast("¡Cuenta creada! Bienvenida a AngeLinks");
+      setTimeout(() => router.push("/dashboard"), 1200);
+    } else {
+      setConfirmEmail(true);
+    }
   };
 
   const handleGoogle = async () => {
     setLoading(true);
-    await new Promise((r) => setTimeout(r, 1200));
-    setToast("¡Cuenta creada! Bienvenida a AngeLinks");
-    setTimeout(() => router.push("/dashboard"), 1200);
+    const supabase = getSupabaseBrowser();
+    const { error } = await supabase.auth.signInWithOAuth({
+      provider: "google",
+      options: {
+        redirectTo: `${window.location.origin}/auth/callback`,
+      },
+    });
+    if (error) {
+      setLoading(false);
+      setErrors({ email: error.message });
+    }
   };
 
   const update = (field: string, value: string) => {
     setForm((prev) => ({ ...prev, [field]: value }));
     if (errors[field]) setErrors((prev) => ({ ...prev, [field]: "" }));
   };
+
+  if (confirmEmail) {
+    return (
+      <div className="text-center">
+        <div className="w-16 h-16 bg-secondary-100 rounded-2xl flex items-center justify-center mx-auto mb-4">
+          <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" className="text-secondary-600">
+            <path d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
+          </svg>
+        </div>
+        <h1 className="font-display text-2xl font-bold text-warm-900">
+          Revisa tu correo
+        </h1>
+        <p className="mt-3 text-sm text-warm-600 leading-relaxed">
+          Te enviamos un enlace de confirmación a<br />
+          <strong className="text-warm-800">{form.email}</strong>
+        </p>
+        <p className="mt-4 text-xs text-warm-500">
+          Haz clic en el enlace del correo para activar tu cuenta.
+          <br />
+          Revisa la carpeta de spam si no lo ves.
+        </p>
+        <div className="mt-8 space-y-3">
+          <button
+            onClick={() => setConfirmEmail(false)}
+            className="w-full bg-warm-100 hover:bg-warm-200 text-warm-700 font-medium py-3 rounded-xl transition-colors text-sm"
+          >
+            Usar otro correo
+          </button>
+          <Link
+            href="/auth/login"
+            className="block text-sm text-accent-600 hover:text-accent-700 font-semibold transition-colors"
+          >
+            Ya confirmé, iniciar sesión
+          </Link>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <>

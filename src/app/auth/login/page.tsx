@@ -1,19 +1,31 @@
 "use client";
 
-import { useState, type FormEvent } from "react";
-import { useRouter } from "next/navigation";
+import { useState, type FormEvent, Suspense } from "react";
+import { useRouter, useSearchParams } from "next/navigation";
 import Link from "next/link";
 import AuthInput from "@/components/auth/AuthInput";
 import SocialButton from "@/components/auth/SocialButton";
 import AuthDivider from "@/components/auth/AuthDivider";
+import { getSupabaseBrowser } from "@/lib/supabase-browser";
 
 export default function LoginPage() {
+  return (
+    <Suspense>
+      <LoginForm />
+    </Suspense>
+  );
+}
+
+function LoginForm() {
   const router = useRouter();
+  const searchParams = useSearchParams();
   const [loading, setLoading] = useState(false);
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [form, setForm] = useState({ email: "", password: "" });
   const [remember, setRemember] = useState(false);
   const [toast, setToast] = useState<string | null>(null);
+
+  const confirmationError = searchParams.get("error") === "confirmation_failed";
 
   const validate = () => {
     const e: Record<string, string> = {};
@@ -29,16 +41,43 @@ export default function LoginPage() {
     e.preventDefault();
     if (!validate()) return;
     setLoading(true);
-    await new Promise((r) => setTimeout(r, 1200));
+
+    const supabase = getSupabaseBrowser();
+    const { error } = await supabase.auth.signInWithPassword({
+      email: form.email,
+      password: form.password,
+    });
+
+    setLoading(false);
+
+    if (error) {
+      if (error.message.includes("Invalid login")) {
+        setErrors({ password: "Correo o contraseña incorrectos" });
+      } else if (error.message.includes("Email not confirmed")) {
+        setErrors({ email: "Confirma tu correo primero. Revisa tu bandeja de entrada." });
+      } else {
+        setErrors({ password: error.message });
+      }
+      return;
+    }
+
     setToast("¡Bienvenida! Redirigiendo...");
     setTimeout(() => router.push("/dashboard"), 1000);
   };
 
   const handleGoogle = async () => {
     setLoading(true);
-    await new Promise((r) => setTimeout(r, 1200));
-    setToast("¡Bienvenida! Redirigiendo...");
-    setTimeout(() => router.push("/dashboard"), 1000);
+    const supabase = getSupabaseBrowser();
+    const { error } = await supabase.auth.signInWithOAuth({
+      provider: "google",
+      options: {
+        redirectTo: `${window.location.origin}/auth/callback`,
+      },
+    });
+    if (error) {
+      setLoading(false);
+      setErrors({ email: error.message });
+    }
   };
 
   const update = (field: string, value: string) => {
@@ -65,6 +104,12 @@ export default function LoginPage() {
         <p className="mt-2 text-sm text-warm-600">
           Accede a tu cuenta para gestionar tus catálogos
         </p>
+
+        {confirmationError && (
+          <div className="mt-4 p-3 bg-red-50 border border-red-200 rounded-xl text-sm text-red-700">
+            No pudimos confirmar tu correo. Intenta de nuevo o regístrate con otro correo.
+          </div>
+        )}
 
         <div className="mt-8 space-y-6">
           <SocialButton provider="google" onClick={handleGoogle} disabled={loading} />
