@@ -3,6 +3,8 @@
 import { useState, useEffect, useCallback } from "react";
 import type { Order } from "@/types";
 import Toast from "@/components/shared/Toast";
+import { getSupabaseBrowser } from "@/lib/supabase-browser";
+import { useAuth } from "@/components/auth/AuthProvider";
 
 const statusConfig = {
   pending: { label: "Pendiente", bg: "bg-amber-100", text: "text-amber-700", next: "confirmed" as const, nextLabel: "Confirmar" },
@@ -12,21 +14,37 @@ const statusConfig = {
 };
 
 export default function OrdersPage() {
+  const { user } = useAuth();
   const [orders, setOrders] = useState<Order[]>([]);
   const [filter, setFilter] = useState<string>("all");
   const [toast, setToast] = useState({ visible: false, message: "" });
   const [expandedOrder, setExpandedOrder] = useState<string | null>(null);
 
   useEffect(() => {
-    fetch("/api/orders")
-      .then((r) => r.json())
-      .then((d) => setOrders(d.orders || []));
-  }, []);
+    if (!user) return;
+    const supabase = getSupabaseBrowser();
+    supabase
+      .from("orders")
+      .select("*, items:order_items(*)")
+      .order("created_at", { ascending: false })
+      .then(({ data }) => setOrders(data || []));
+  }, [user]);
 
   const filtered =
     filter === "all" ? orders : orders.filter((o) => o.status === filter);
 
-  const updateStatus = useCallback((orderId: string, newStatus: Order["status"]) => {
+  const updateStatus = useCallback(async (orderId: string, newStatus: Order["status"]) => {
+    const supabase = getSupabaseBrowser();
+    const { error } = await supabase
+      .from("orders")
+      .update({ status: newStatus })
+      .eq("id", orderId);
+
+    if (error) {
+      setToast({ visible: true, message: "Error al actualizar el estado" });
+      return;
+    }
+
     setOrders((prev) =>
       prev.map((o) => (o.id === orderId ? { ...o, status: newStatus } : o))
     );

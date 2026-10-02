@@ -191,21 +191,21 @@ export default function PdfImporter({ onProductsReady }: Props) {
             <div
               className={`border-2 border-dashed rounded-2xl p-12 text-center cursor-pointer transition-colors ${
                 loading
-                  ? "border-brand-300 bg-brand-50"
-                  : "border-gray-200 hover:border-brand-400 hover:bg-brand-50/50"
+                  ? "border-accent-300 bg-accent-50"
+                  : "border-warm-200 hover:border-accent-400 hover:bg-accent-50/50"
               }`}
             >
               {loading ? (
                 <div className="flex flex-col items-center gap-3">
-                  <div className="animate-spin h-8 w-8 border-4 border-brand-600 border-t-transparent rounded-full" />
-                  <p className="text-sm text-brand-700 font-medium">
+                  <div className="animate-spin h-8 w-8 border-4 border-accent-600 border-t-transparent rounded-full" />
+                  <p className="text-sm text-accent-700 font-medium">
                     Procesando PDF...
                   </p>
                 </div>
               ) : (
                 <>
                   <svg
-                    className="mx-auto mb-3 text-gray-400"
+                    className="mx-auto mb-3 text-warm-400"
                     width="40"
                     height="40"
                     viewBox="0 0 24 24"
@@ -216,10 +216,10 @@ export default function PdfImporter({ onProductsReady }: Props) {
                     <path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z" />
                     <polyline points="14 2 14 8 20 8" />
                   </svg>
-                  <p className="text-base font-medium text-gray-700">
+                  <p className="text-base font-medium text-warm-700">
                     Sube tu catálogo en PDF
                   </p>
-                  <p className="text-sm text-gray-500 mt-1">
+                  <p className="text-sm text-warm-500 mt-1">
                     Arrastra o haz clic para seleccionar
                   </p>
                 </>
@@ -264,8 +264,8 @@ export default function PdfImporter({ onProductsReady }: Props) {
                 }}
                 className={`flex-shrink-0 w-24 rounded-xl overflow-hidden border-2 transition-all ${
                   selectedPage === i
-                    ? "border-brand-600 shadow-lg shadow-brand-600/20 scale-105"
-                    : "border-gray-200 hover:border-gray-300"
+                    ? "border-accent-600 shadow-lg shadow-accent-600/20 scale-105"
+                    : "border-warm-200 hover:border-warm-300"
                 }`}
               >
                 <img
@@ -273,7 +273,7 @@ export default function PdfImporter({ onProductsReady }: Props) {
                   alt={`Página ${i + 1}`}
                   className="w-full aspect-[3/4] object-cover"
                 />
-                <p className="text-[10px] text-center py-1 bg-gray-50 font-medium">
+                <p className="text-[10px] text-center py-1 bg-warm-50 font-medium">
                   Pág. {i + 1}
                 </p>
               </button>
@@ -284,8 +284,8 @@ export default function PdfImporter({ onProductsReady }: Props) {
 
       {/* Selected Page + Crop */}
       {selectedPage !== null && (
-        <div className="bg-white rounded-2xl border border-gray-200 overflow-hidden">
-          <div className="flex items-center justify-between p-4 border-b border-gray-100">
+        <div className="bg-white rounded-2xl border border-warm-200 overflow-hidden">
+          <div className="flex items-center justify-between p-4 border-b border-warm-100">
             <p className="font-medium text-sm">
               Página {selectedPage + 1} — {cropping ? "Dibuja un rectángulo sobre el producto" : "Selecciona un producto"}
             </p>
@@ -295,7 +295,7 @@ export default function PdfImporter({ onProductsReady }: Props) {
                 className={`text-sm font-medium px-4 py-2 rounded-lg transition-colors ${
                   cropping
                     ? "bg-red-100 text-red-700 hover:bg-red-200"
-                    : "bg-brand-100 text-brand-700 hover:bg-brand-200"
+                    : "bg-accent-100 text-accent-700 hover:bg-accent-200"
                 }`}
               >
                 {cropping ? "Cancelar selección" : "Seleccionar producto"}
@@ -317,7 +317,7 @@ export default function PdfImporter({ onProductsReady }: Props) {
             />
             {selectionStyle && (
               <div
-                className="absolute border-2 border-brand-600 bg-brand-600/10 pointer-events-none"
+                className="absolute border-2 border-accent-600 bg-accent-600/10 pointer-events-none"
                 style={selectionStyle}
               />
             )}
@@ -330,8 +330,8 @@ export default function PdfImporter({ onProductsReady }: Props) {
 
       {/* Product Form (after cropping) */}
       {croppedImage && (
-        <div className="bg-brand-50 rounded-2xl p-5 border border-brand-200">
-          <h3 className="font-semibold mb-4 text-brand-800">
+        <div className="bg-accent-50 rounded-2xl p-5 border border-accent-200">
+          <h3 className="font-semibold mb-4 text-accent-800">
             Agregar producto
           </h3>
           <div className="flex gap-4 flex-col sm:flex-row">
@@ -350,7 +350,7 @@ export default function PdfImporter({ onProductsReady }: Props) {
                 onChange={(e) =>
                   setProductForm((f) => ({ ...f, name: e.target.value }))
                 }
-                className="w-full px-3 py-2.5 rounded-xl border border-gray-200 text-sm focus:outline-none focus:ring-2 focus:ring-brand-500"
+                className="w-full px-3 py-2.5 rounded-xl border border-warm-200 text-sm focus:outline-none focus:ring-2 focus:ring-accent-500"
               />
               <div className="flex gap-2">
                 <input
@@ -360,14 +360,14 @@ export default function PdfImporter({ onProductsReady }: Props) {
                   onChange={(e) =>
                     setProductForm((f) => ({ ...f, price: e.target.value }))
                   }
-                  className="flex-1 px-3 py-2.5 rounded-xl border border-gray-200 text-sm focus:outline-none focus:ring-2 focus:ring-brand-500"
+                  className="flex-1 px-3 py-2.5 rounded-xl border border-warm-200 text-sm focus:outline-none focus:ring-2 focus:ring-accent-500"
                 />
                 <select
                   value={productForm.category}
                   onChange={(e) =>
                     setProductForm((f) => ({ ...f, category: e.target.value }))
                   }
-                  className="flex-1 px-3 py-2.5 rounded-xl border border-gray-200 text-sm focus:outline-none focus:ring-2 focus:ring-brand-500 bg-white"
+                  className="flex-1 px-3 py-2.5 rounded-xl border border-warm-200 text-sm focus:outline-none focus:ring-2 focus:ring-accent-500 bg-white"
                 >
                   <option>General</option>
                   <option>Perfumería</option>
@@ -385,13 +385,13 @@ export default function PdfImporter({ onProductsReady }: Props) {
                 onChange={(e) =>
                   setProductForm((f) => ({ ...f, description: e.target.value }))
                 }
-                className="w-full px-3 py-2.5 rounded-xl border border-gray-200 text-sm focus:outline-none focus:ring-2 focus:ring-brand-500"
+                className="w-full px-3 py-2.5 rounded-xl border border-warm-200 text-sm focus:outline-none focus:ring-2 focus:ring-accent-500"
               />
               <div className="flex gap-2">
                 <button
                   onClick={addProduct}
                   disabled={!productForm.name || !productForm.price}
-                  className="bg-brand-600 hover:bg-brand-700 disabled:bg-gray-300 text-white text-sm font-medium px-5 py-2.5 rounded-xl transition-colors"
+                  className="bg-accent-500 hover:bg-accent-600 disabled:bg-warm-300 text-white text-sm font-medium px-5 py-2.5 rounded-xl transition-colors"
                 >
                   Agregar
                 </button>
@@ -400,7 +400,7 @@ export default function PdfImporter({ onProductsReady }: Props) {
                     setCroppedImage(null);
                     setCropping(true);
                   }}
-                  className="text-sm text-gray-600 hover:text-gray-800 px-3"
+                  className="text-sm text-warm-600 hover:text-warm-800 px-3"
                 >
                   Recortar otra vez
                 </button>
@@ -419,16 +419,16 @@ export default function PdfImporter({ onProductsReady }: Props) {
             </h3>
             <button
               onClick={() => onProductsReady(products)}
-              className="bg-brand-600 hover:bg-brand-700 text-white text-sm font-semibold px-6 py-2.5 rounded-xl transition-colors"
+              className="bg-accent-500 hover:bg-accent-600 text-white text-sm font-semibold px-6 py-2.5 rounded-xl transition-colors"
             >
-              Crear catálogo con {products.length} productos
+              Agregar {products.length} productos al catálogo
             </button>
           </div>
           <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-3">
             {products.map((product, i) => (
               <div
                 key={i}
-                className="bg-white rounded-xl border border-gray-200 overflow-hidden group"
+                className="bg-white rounded-xl border border-warm-200 overflow-hidden group"
               >
                 <div className="relative aspect-square">
                   <img
@@ -445,10 +445,10 @@ export default function PdfImporter({ onProductsReady }: Props) {
                 </div>
                 <div className="p-3">
                   <p className="text-xs font-medium truncate">{product.name}</p>
-                  <p className="text-sm font-bold text-brand-700">
+                  <p className="text-sm font-bold text-accent-600">
                     ${product.price.toLocaleString("es-CO")}
                   </p>
-                  <p className="text-[10px] text-gray-500">{product.category}</p>
+                  <p className="text-[10px] text-warm-500">{product.category}</p>
                 </div>
               </div>
             ))}

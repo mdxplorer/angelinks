@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
-import { createOrder, getCatalog, getOrders } from "@/lib/store";
+import { createOrder, getOrders } from "@/lib/store";
 import { sendOrderNotification } from "@/lib/email";
-import { demoSeller } from "@/lib/demo-data";
+import { createClient } from "@supabase/supabase-js";
 
 export async function POST(req: NextRequest) {
   try {
@@ -43,15 +43,20 @@ export async function POST(req: NextRequest) {
       items,
     });
 
-    // Find catalog for email context
-    const catalogs = await (async () => {
-      const { getCatalogs } = await import("@/lib/store");
-      return getCatalogs();
-    })();
-    const catalog = catalogs.find((c) => c.id === catalog_id);
+    // Find catalog + seller email for notification
+    const serviceKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
+    const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
+    if (serviceKey && supabaseUrl) {
+      const admin = createClient(supabaseUrl, serviceKey);
+      const { data: catalog } = await admin
+        .from("catalogs")
+        .select("*, seller:profiles!seller_id(email)")
+        .eq("id", catalog_id)
+        .single();
 
-    if (catalog) {
-      await sendOrderNotification(order, catalog, demoSeller.email);
+      if (catalog?.seller?.email) {
+        await sendOrderNotification(order, catalog, catalog.seller.email);
+      }
     }
 
     return NextResponse.json({ order }, { status: 201 });

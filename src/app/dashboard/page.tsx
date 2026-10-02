@@ -3,20 +3,39 @@
 import { useState, useEffect } from "react";
 import Link from "next/link";
 import type { Catalog, Order } from "@/types";
+import { getSupabaseBrowser } from "@/lib/supabase-browser";
+import { useAuth } from "@/components/auth/AuthProvider";
 
 export default function DashboardPage() {
+  const { user } = useAuth();
   const [catalogs, setCatalogs] = useState<Catalog[]>([]);
   const [orders, setOrders] = useState<Order[]>([]);
   const [copied, setCopied] = useState<string | null>(null);
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    fetch("/api/catalogs")
-      .then((r) => r.json())
-      .then((d) => setCatalogs(d.catalogs || []));
-    fetch("/api/orders")
-      .then((r) => r.json())
-      .then((d) => setOrders(d.orders || []));
-  }, []);
+    if (!user) return;
+    const supabase = getSupabaseBrowser();
+
+    async function load() {
+      const [catalogsRes, ordersRes] = await Promise.all([
+        supabase
+          .from("catalogs")
+          .select("*")
+          .eq("seller_id", user!.id)
+          .order("created_at", { ascending: false }),
+        supabase
+          .from("orders")
+          .select("*, items:order_items(*)")
+          .order("created_at", { ascending: false }),
+      ]);
+      setCatalogs(catalogsRes.data || []);
+      setOrders(ordersRes.data || []);
+      setLoading(false);
+    }
+
+    load();
+  }, [user]);
 
   const appUrl = typeof window !== "undefined" ? window.location.origin : "";
 
@@ -35,59 +54,87 @@ export default function DashboardPage() {
     window.open(`https://wa.me/?text=${text}`, "_blank");
   };
 
-  const totalRevenue = orders.reduce((sum, o) => sum + o.total, 0);
+  const totalRevenue = orders
+    .filter((o) => o.status !== "cancelled")
+    .reduce((sum, o) => sum + o.total, 0);
   const pendingOrders = orders.filter((o) => o.status === "pending");
 
-  return (
-    <>
-      <main className="max-w-6xl mx-auto px-4 py-8 pb-24 md:pb-8">
-        {/* Stats */}
+  if (loading) {
+    return (
+      <main className="max-w-6xl mx-auto px-4 py-8">
         <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
-          <div className="bg-white rounded-2xl p-5 shadow-sm border border-warm-200">
-            <p className="text-xs text-warm-600 uppercase tracking-wider">
-              Catálogos
-            </p>
-            <p className="text-3xl font-display font-bold mt-1 text-warm-800">{catalogs.length}</p>
-          </div>
-          <div className="bg-white rounded-2xl p-5 shadow-sm border border-warm-200">
-            <p className="text-xs text-warm-600 uppercase tracking-wider">
-              Pedidos
-            </p>
-            <p className="text-3xl font-display font-bold mt-1 text-warm-800">{orders.length}</p>
-          </div>
-          <div className="bg-white rounded-2xl p-5 shadow-sm border border-warm-200">
-            <p className="text-xs text-warm-600 uppercase tracking-wider">
-              Pendientes
-            </p>
-            <p className="text-3xl font-display font-bold mt-1 text-amber-600">
-              {pendingOrders.length}
-            </p>
-          </div>
-          <div className="bg-white rounded-2xl p-5 shadow-sm border border-warm-200">
-            <p className="text-xs text-warm-600 uppercase tracking-wider">
-              Ventas totales
-            </p>
-            <p className="text-3xl font-display font-bold mt-1 text-accent-600">
-              ${totalRevenue.toLocaleString("es-CO")}
-            </p>
-          </div>
+          {[1, 2, 3, 4].map((i) => (
+            <div key={i} className="bg-white rounded-2xl p-5 shadow-sm border border-warm-200 animate-pulse">
+              <div className="h-3 bg-warm-200 rounded w-20 mb-3" />
+              <div className="h-8 bg-warm-200 rounded w-12" />
+            </div>
+          ))}
         </div>
+      </main>
+    );
+  }
 
-        {/* Catalogs */}
-        <section className="mb-8">
-          <h2 className="text-lg font-display font-bold mb-4 text-warm-800">Mis catálogos</h2>
+  return (
+    <main className="max-w-6xl mx-auto px-4 py-8 pb-24 md:pb-8">
+      {/* Stats */}
+      <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
+        <div className="bg-white rounded-2xl p-5 shadow-sm border border-warm-200">
+          <p className="text-xs text-warm-600 uppercase tracking-wider">Catálogos</p>
+          <p className="text-3xl font-display font-bold mt-1 text-warm-800">{catalogs.length}</p>
+        </div>
+        <div className="bg-white rounded-2xl p-5 shadow-sm border border-warm-200">
+          <p className="text-xs text-warm-600 uppercase tracking-wider">Pedidos</p>
+          <p className="text-3xl font-display font-bold mt-1 text-warm-800">{orders.length}</p>
+        </div>
+        <div className="bg-white rounded-2xl p-5 shadow-sm border border-warm-200">
+          <p className="text-xs text-warm-600 uppercase tracking-wider">Pendientes</p>
+          <p className="text-3xl font-display font-bold mt-1 text-amber-600">{pendingOrders.length}</p>
+        </div>
+        <div className="bg-white rounded-2xl p-5 shadow-sm border border-warm-200">
+          <p className="text-xs text-warm-600 uppercase tracking-wider">Ventas totales</p>
+          <p className="text-3xl font-display font-bold mt-1 text-accent-600">
+            ${totalRevenue.toLocaleString("es-CO")}
+          </p>
+        </div>
+      </div>
+
+      {/* Catalogs */}
+      <section className="mb-8">
+        <h2 className="text-lg font-display font-bold mb-4 text-warm-800">Mis catálogos</h2>
+        {catalogs.length === 0 ? (
+          <div className="bg-white rounded-2xl p-12 text-center shadow-sm border border-warm-200">
+            <div className="w-16 h-16 bg-warm-200 rounded-2xl flex items-center justify-center mx-auto mb-4">
+              <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" className="text-warm-500">
+                <path d="M12 5v14M5 12h14" />
+              </svg>
+            </div>
+            <p className="text-warm-600 text-sm">Aún no tienes catálogos</p>
+            <p className="text-warm-500 text-xs mt-1 mb-4">Crea tu primer catálogo para empezar a vender</p>
+            <Link
+              href="/dashboard/catalogs/new"
+              className="inline-flex items-center gap-2 bg-accent-500 hover:bg-accent-600 text-white text-sm font-medium px-5 py-2.5 rounded-xl transition-colors"
+            >
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
+                <path d="M12 5v14M5 12h14" />
+              </svg>
+              Crear catálogo
+            </Link>
+          </div>
+        ) : (
           <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
             {catalogs.map((catalog) => (
               <div
                 key={catalog.id}
                 className="bg-white rounded-2xl overflow-hidden shadow-sm border border-warm-200"
               >
-                <div className="h-32 bg-gradient-to-br from-brand-300 to-brand-500 relative overflow-hidden">
-                  <img
-                    src={catalog.cover_image}
-                    alt={catalog.name}
-                    className="w-full h-full object-cover opacity-60"
-                  />
+                <div className="h-32 bg-gradient-to-br from-accent-300 to-accent-500 relative overflow-hidden">
+                  {catalog.cover_image && (
+                    <img
+                      src={catalog.cover_image}
+                      alt={catalog.name}
+                      className="w-full h-full object-cover opacity-60"
+                    />
+                  )}
                   <div className="absolute bottom-0 left-0 right-0 p-4">
                     <span className="bg-white/90 backdrop-blur-sm text-xs font-medium px-2 py-0.5 rounded-full text-warm-700">
                       {catalog.brand}
@@ -96,9 +143,7 @@ export default function DashboardPage() {
                 </div>
                 <div className="p-4">
                   <h3 className="font-semibold text-sm text-warm-800">{catalog.name}</h3>
-                  <p className="text-xs text-warm-600 mt-1 line-clamp-2">
-                    {catalog.description}
-                  </p>
+                  <p className="text-xs text-warm-600 mt-1 line-clamp-2">{catalog.description}</p>
                   <div className="flex gap-2 mt-4">
                     <button
                       onClick={() => copyLink(catalog.slug)}
@@ -110,28 +155,14 @@ export default function DashboardPage() {
                     >
                       {copied === catalog.slug ? (
                         <>
-                          <svg
-                            width="14"
-                            height="14"
-                            viewBox="0 0 24 24"
-                            fill="none"
-                            stroke="currentColor"
-                            strokeWidth="2"
-                          >
+                          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
                             <polyline points="20 6 9 17 4 12" />
                           </svg>
                           Copiado
                         </>
                       ) : (
                         <>
-                          <svg
-                            width="14"
-                            height="14"
-                            viewBox="0 0 24 24"
-                            fill="none"
-                            stroke="currentColor"
-                            strokeWidth="2"
-                          >
+                          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
                             <path d="M10 13a5 5 0 007.54.54l3-3a5 5 0 00-7.07-7.07l-1.72 1.71" />
                             <path d="M14 11a5 5 0 00-7.54-.54l-3 3a5 5 0 007.07 7.07l1.71-1.71" />
                           </svg>
@@ -140,9 +171,7 @@ export default function DashboardPage() {
                       )}
                     </button>
                     <button
-                      onClick={() =>
-                        shareWhatsApp(catalog.slug, catalog.name)
-                      }
+                      onClick={() => shareWhatsApp(catalog.slug, catalog.name)}
                       className="flex-1 text-xs font-medium px-3 py-2 rounded-lg bg-secondary-100 hover:bg-secondary-200 text-secondary-700 transition-colors flex items-center justify-center gap-1.5"
                     >
                       <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor">
@@ -155,14 +184,7 @@ export default function DashboardPage() {
                       target="_blank"
                       className="w-10 h-10 rounded-lg bg-warm-100 hover:bg-warm-200 flex items-center justify-center text-warm-600 transition-colors flex-shrink-0"
                     >
-                      <svg
-                        width="14"
-                        height="14"
-                        viewBox="0 0 24 24"
-                        fill="none"
-                        stroke="currentColor"
-                        strokeWidth="2"
-                      >
+                      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
                         <path d="M18 13v6a2 2 0 01-2 2H5a2 2 0 01-2-2V8a2 2 0 012-2h6" />
                         <polyline points="15 3 21 3 21 9" />
                         <line x1="10" y1="14" x2="21" y2="3" />
@@ -173,112 +195,91 @@ export default function DashboardPage() {
               </div>
             ))}
           </div>
-        </section>
+        )}
+      </section>
 
-        {/* Recent Orders */}
-        <section>
-          <div className="flex items-center justify-between mb-4">
-            <h2 className="text-lg font-display font-bold text-warm-800">Pedidos recientes</h2>
-            {orders.length > 0 && (
-              <Link
-                href="/dashboard/orders"
-                className="text-sm text-accent-600 hover:text-accent-700 font-medium"
-              >
-                Ver todos
-              </Link>
-            )}
-          </div>
-
-          {orders.length === 0 ? (
-            <div className="bg-white rounded-2xl p-12 text-center shadow-sm border border-warm-200">
-              <div className="w-16 h-16 bg-warm-200 rounded-2xl flex items-center justify-center mx-auto mb-4">
-                <svg
-                  width="24"
-                  height="24"
-                  viewBox="0 0 24 24"
-                  fill="none"
-                  stroke="currentColor"
-                  strokeWidth="1.5"
-                >
-                  <path d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z" />
-                </svg>
-              </div>
-              <p className="text-warm-600 text-sm">Aún no tienes pedidos</p>
-              <p className="text-warm-500 text-xs mt-1">
-                Comparte tu catálogo para empezar a recibir pedidos
-              </p>
-            </div>
-          ) : (
-            <div className="bg-white rounded-2xl shadow-sm border border-warm-200 overflow-hidden">
-              <div className="overflow-x-auto">
-                <table className="w-full">
-                  <thead>
-                    <tr className="bg-warm-50 text-xs text-warm-600 uppercase tracking-wider">
-                      <th className="text-left p-4">Cliente</th>
-                      <th className="text-left p-4">Ciudad</th>
-                      <th className="text-left p-4">Total</th>
-                      <th className="text-left p-4">Estado</th>
-                      <th className="text-left p-4">Fecha</th>
-                    </tr>
-                  </thead>
-                  <tbody className="divide-y divide-warm-100">
-                    {orders.slice(0, 10).map((order) => (
-                      <tr key={order.id} className="hover:bg-warm-50/50">
-                        <td className="p-4">
-                          <p className="text-sm font-medium text-warm-800">
-                            {order.customer_name}
-                          </p>
-                          <p className="text-xs text-warm-600">
-                            {order.customer_phone}
-                          </p>
-                        </td>
-                        <td className="p-4 text-sm text-warm-600">
-                          {order.customer_city}
-                        </td>
-                        <td className="p-4 text-sm font-semibold text-accent-600">
-                          ${order.total.toLocaleString("es-CO")}
-                        </td>
-                        <td className="p-4">
-                          <span
-                            className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${
-                              order.status === "pending"
-                                ? "bg-amber-100 text-amber-700"
-                                : order.status === "confirmed"
-                                ? "bg-blue-100 text-blue-700"
-                                : order.status === "delivered"
-                                ? "bg-secondary-100 text-secondary-700"
-                                : "bg-red-100 text-red-700"
-                            }`}
-                          >
-                            {order.status === "pending"
-                              ? "Pendiente"
-                              : order.status === "confirmed"
-                              ? "Confirmado"
-                              : order.status === "delivered"
-                              ? "Entregado"
-                              : "Cancelado"}
-                          </span>
-                        </td>
-                        <td className="p-4 text-xs text-warm-600">
-                          {new Date(order.created_at).toLocaleDateString(
-                            "es-CO",
-                            {
-                              day: "numeric",
-                              month: "short",
-                              hour: "2-digit",
-                              minute: "2-digit",
-                            }
-                          )}
-                        </td>
-                      </tr>
-                    ))}
-                  </tbody>
-                </table>
-              </div>
-            </div>
+      {/* Recent Orders */}
+      <section>
+        <div className="flex items-center justify-between mb-4">
+          <h2 className="text-lg font-display font-bold text-warm-800">Pedidos recientes</h2>
+          {orders.length > 0 && (
+            <Link href="/dashboard/orders" className="text-sm text-accent-600 hover:text-accent-700 font-medium">
+              Ver todos
+            </Link>
           )}
-        </section>
-      </main>
-    </>
+        </div>
+
+        {orders.length === 0 ? (
+          <div className="bg-white rounded-2xl p-12 text-center shadow-sm border border-warm-200">
+            <div className="w-16 h-16 bg-warm-200 rounded-2xl flex items-center justify-center mx-auto mb-4">
+              <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" className="text-warm-500">
+                <path d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z" />
+              </svg>
+            </div>
+            <p className="text-warm-600 text-sm">Aún no tienes pedidos</p>
+            <p className="text-warm-500 text-xs mt-1">Comparte tu catálogo para empezar a recibir pedidos</p>
+          </div>
+        ) : (
+          <div className="bg-white rounded-2xl shadow-sm border border-warm-200 overflow-hidden">
+            <div className="overflow-x-auto">
+              <table className="w-full">
+                <thead>
+                  <tr className="bg-warm-50 text-xs text-warm-600 uppercase tracking-wider">
+                    <th className="text-left p-4">Cliente</th>
+                    <th className="text-left p-4">Ciudad</th>
+                    <th className="text-left p-4">Total</th>
+                    <th className="text-left p-4">Estado</th>
+                    <th className="text-left p-4">Fecha</th>
+                  </tr>
+                </thead>
+                <tbody className="divide-y divide-warm-100">
+                  {orders.slice(0, 10).map((order) => (
+                    <tr key={order.id} className="hover:bg-warm-50/50">
+                      <td className="p-4">
+                        <p className="text-sm font-medium text-warm-800">{order.customer_name}</p>
+                        <p className="text-xs text-warm-600">{order.customer_phone}</p>
+                      </td>
+                      <td className="p-4 text-sm text-warm-600">{order.customer_city}</td>
+                      <td className="p-4 text-sm font-semibold text-accent-600">
+                        ${order.total.toLocaleString("es-CO")}
+                      </td>
+                      <td className="p-4">
+                        <span
+                          className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${
+                            order.status === "pending"
+                              ? "bg-amber-100 text-amber-700"
+                              : order.status === "confirmed"
+                              ? "bg-blue-100 text-blue-700"
+                              : order.status === "delivered"
+                              ? "bg-secondary-100 text-secondary-700"
+                              : "bg-red-100 text-red-700"
+                          }`}
+                        >
+                          {order.status === "pending"
+                            ? "Pendiente"
+                            : order.status === "confirmed"
+                            ? "Confirmado"
+                            : order.status === "delivered"
+                            ? "Entregado"
+                            : "Cancelado"}
+                        </span>
+                      </td>
+                      <td className="p-4 text-xs text-warm-600">
+                        {new Date(order.created_at).toLocaleDateString("es-CO", {
+                          day: "numeric",
+                          month: "short",
+                          hour: "2-digit",
+                          minute: "2-digit",
+                        })}
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          </div>
+        )}
+      </section>
+    </main>
   );
 }
