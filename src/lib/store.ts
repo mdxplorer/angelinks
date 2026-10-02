@@ -1,4 +1,5 @@
 import type { Catalog, Product, Order } from "@/types";
+import { createClient } from "@supabase/supabase-js";
 import { getSupabase, isSupabaseConfigured } from "./supabase";
 import {
   demoCatalogs,
@@ -103,7 +104,12 @@ export async function createOrder(order: {
     return newOrder;
   }
 
-  const db = getSupabase();
+  // Use service role key to bypass RLS (anon can INSERT but not SELECT back)
+  const serviceKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
+  const url = process.env.NEXT_PUBLIC_SUPABASE_URL || "";
+  const db = serviceKey
+    ? createClient(url, serviceKey)
+    : getSupabase();
 
   const { data: orderData, error: orderError } = await db
     .from("orders")

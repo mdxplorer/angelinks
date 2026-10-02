@@ -50,7 +50,7 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: msg }, { status: 500 });
   }
 
-  // Notification — separate try-catch so order still succeeds
+  // Notification — separate try-catch so order response always succeeds
   let seller: { name: string; whatsapp: string } | null = null;
   try {
     const serviceKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
@@ -79,7 +79,7 @@ export async function POST(req: NextRequest) {
       }
     }
   } catch (err) {
-    console.error("[AngeLinks] Notification error (order still created):", err);
+    console.error("[AngeLinks] Notification error (order created OK):", err);
   }
 
   return NextResponse.json({ order, seller }, { status: 201 });
