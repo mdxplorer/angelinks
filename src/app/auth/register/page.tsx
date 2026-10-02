@@ -4,8 +4,6 @@ import { useState, type FormEvent } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import AuthInput from "@/components/auth/AuthInput";
-import SocialButton from "@/components/auth/SocialButton";
-import AuthDivider from "@/components/auth/AuthDivider";
 import { getSupabaseBrowser } from "@/lib/supabase-browser";
 
 export default function RegisterPage() {
@@ -74,21 +72,6 @@ export default function RegisterPage() {
     }
   };
 
-  const handleGoogle = async () => {
-    setLoading(true);
-    const supabase = getSupabaseBrowser();
-    const { error } = await supabase.auth.signInWithOAuth({
-      provider: "google",
-      options: {
-        redirectTo: `${window.location.origin}/auth/callback`,
-      },
-    });
-    if (error) {
-      setLoading(false);
-      setErrors({ email: error.message });
-    }
-  };
-
   const update = (field: string, value: string) => {
     setForm((prev) => ({ ...prev, [field]: value }));
     if (errors[field]) setErrors((prev) => ({ ...prev, [field]: "" }));
@@ -153,10 +136,6 @@ export default function RegisterPage() {
         </p>
 
         <div className="mt-8 space-y-6">
-          <SocialButton provider="google" onClick={handleGoogle} disabled={loading} />
-
-          <AuthDivider />
-
           <form onSubmit={handleSubmit} className="space-y-4" noValidate>
             <AuthInput
               label="Nombre completo"

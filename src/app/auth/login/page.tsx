@@ -4,8 +4,6 @@ import { useState, type FormEvent, Suspense } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import Link from "next/link";
 import AuthInput from "@/components/auth/AuthInput";
-import SocialButton from "@/components/auth/SocialButton";
-import AuthDivider from "@/components/auth/AuthDivider";
 import { getSupabaseBrowser } from "@/lib/supabase-browser";
 
 export default function LoginPage() {
@@ -65,21 +63,6 @@ function LoginForm() {
     setTimeout(() => router.push("/dashboard"), 1000);
   };
 
-  const handleGoogle = async () => {
-    setLoading(true);
-    const supabase = getSupabaseBrowser();
-    const { error } = await supabase.auth.signInWithOAuth({
-      provider: "google",
-      options: {
-        redirectTo: `${window.location.origin}/auth/callback`,
-      },
-    });
-    if (error) {
-      setLoading(false);
-      setErrors({ email: error.message });
-    }
-  };
-
   const update = (field: string, value: string) => {
     setForm((prev) => ({ ...prev, [field]: value }));
     if (errors[field]) setErrors((prev) => ({ ...prev, [field]: "" }));
@@ -112,10 +95,6 @@ function LoginForm() {
         )}
 
         <div className="mt-8 space-y-6">
-          <SocialButton provider="google" onClick={handleGoogle} disabled={loading} />
-
-          <AuthDivider />
-
           <form onSubmit={handleSubmit} className="space-y-4" noValidate>
             <AuthInput
               label="Correo electrónico"
