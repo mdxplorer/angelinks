@@ -28,7 +28,7 @@ function loadPdfJs(): Promise<any> {
 }
 /* eslint-enable @typescript-eslint/no-explicit-any */
 
-interface ExtractedProduct {
+export interface ExtractedProduct {
   name: string;
   price: number;
   category: string;
@@ -37,19 +37,19 @@ interface ExtractedProduct {
 }
 
 interface Props {
-  onProductsReady: (products: ExtractedProduct[]) => void;
+  onProductAdded: (product: ExtractedProduct) => void;
 }
 
-export default function PdfImporter({ onProductsReady }: Props) {
+export default function PdfImporter({ onProductAdded }: Props) {
   const [pages, setPages] = useState<string[]>([]);
   const [loading, setLoading] = useState(false);
   const [selectedPage, setSelectedPage] = useState<number | null>(null);
-  const [products, setProducts] = useState<ExtractedProduct[]>([]);
   const [cropping, setCropping] = useState(false);
   const [cropStart, setCropStart] = useState<{ x: number; y: number } | null>(null);
   const [cropEnd, setCropEnd] = useState<{ x: number; y: number } | null>(null);
   const [croppedImage, setCroppedImage] = useState<string | null>(null);
   const [productForm, setProductForm] = useState({ name: "", price: "", category: "General", description: "" });
+  const [addedCount, setAddedCount] = useState(0);
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const imgRef = useRef<HTMLImageElement>(null);
 
@@ -92,84 +92,99 @@ export default function PdfImporter({ onProductsReady }: Props) {
     }
   };
 
-  const handleMouseDown = useCallback(
-    (e: React.MouseEvent<HTMLDivElement>) => {
+  const getPointerPos = (e: React.MouseEvent | React.TouchEvent, rect: DOMRect) => {
+    const point = "touches" in e ? e.touches[0] || e.changedTouches[0] : e;
+    return {
+      x: (point.clientX - rect.left) / rect.width,
+      y: (point.clientY - rect.top) / rect.height,
+    };
+  };
+
+  const handlePointerDown = useCallback(
+    (e: React.MouseEvent<HTMLDivElement> | React.TouchEvent<HTMLDivElement>) => {
       if (!cropping) return;
+      if ("touches" in e) e.preventDefault();
       const rect = e.currentTarget.getBoundingClientRect();
-      setCropStart({
-        x: (e.clientX - rect.left) / rect.width,
-        y: (e.clientY - rect.top) / rect.height,
-      });
+      setCropStart(getPointerPos(e, rect));
       setCropEnd(null);
     },
     [cropping]
   );
 
-  const handleMouseMove = useCallback(
-    (e: React.MouseEvent<HTMLDivElement>) => {
+  const handlePointerMove = useCallback(
+    (e: React.MouseEvent<HTMLDivElement> | React.TouchEvent<HTMLDivElement>) => {
       if (!cropping || !cropStart) return;
+      if ("touches" in e) e.preventDefault();
       const rect = e.currentTarget.getBoundingClientRect();
-      setCropEnd({
-        x: (e.clientX - rect.left) / rect.width,
-        y: (e.clientY - rect.top) / rect.height,
-      });
+      setCropEnd(getPointerPos(e, rect));
     },
     [cropping, cropStart]
   );
 
-  const handleMouseUp = useCallback(() => {
-    if (!cropping || !cropStart || !cropEnd || selectedPage === null) return;
+  const handlePointerUp = useCallback(
+    (e: React.MouseEvent<HTMLDivElement> | React.TouchEvent<HTMLDivElement>) => {
+      if (!cropping || !cropStart || selectedPage === null) return;
 
-    const img = imgRef.current;
-    if (!img) return;
+      const finalEnd = cropEnd || ((): { x: number; y: number } | null => {
+        if ("changedTouches" in e) {
+          const rect = e.currentTarget.getBoundingClientRect();
+          return getPointerPos(e, rect);
+        }
+        return null;
+      })();
 
-    const canvas = canvasRef.current;
-    if (!canvas) return;
+      if (!finalEnd) {
+        setCropStart(null);
+        return;
+      }
 
-    const natW = img.naturalWidth;
-    const natH = img.naturalHeight;
+      const img = imgRef.current;
+      const canvas = canvasRef.current;
+      if (!img || !canvas) return;
 
-    const x = Math.min(cropStart.x, cropEnd.x) * natW;
-    const y = Math.min(cropStart.y, cropEnd.y) * natH;
-    const w = Math.abs(cropEnd.x - cropStart.x) * natW;
-    const h = Math.abs(cropEnd.y - cropStart.y) * natH;
+      const natW = img.naturalWidth;
+      const natH = img.naturalHeight;
 
-    if (w < 20 || h < 20) {
+      const x = Math.min(cropStart.x, finalEnd.x) * natW;
+      const y = Math.min(cropStart.y, finalEnd.y) * natH;
+      const w = Math.abs(finalEnd.x - cropStart.x) * natW;
+      const h = Math.abs(finalEnd.y - cropStart.y) * natH;
+
+      if (w < 20 || h < 20) {
+        setCropStart(null);
+        setCropEnd(null);
+        return;
+      }
+
+      canvas.width = w;
+      canvas.height = h;
+      const ctx = canvas.getContext("2d")!;
+      ctx.drawImage(img, x, y, w, h, 0, 0, w, h);
+
+      const dataUrl = canvas.toDataURL("image/jpeg", 0.9);
+      setCroppedImage(dataUrl);
+      setCropping(false);
       setCropStart(null);
       setCropEnd(null);
-      return;
-    }
-
-    canvas.width = w;
-    canvas.height = h;
-    const ctx = canvas.getContext("2d")!;
-    ctx.drawImage(img, x, y, w, h, 0, 0, w, h);
-
-    const dataUrl = canvas.toDataURL("image/jpeg", 0.9);
-    setCroppedImage(dataUrl);
-    setCropping(false);
-    setCropStart(null);
-    setCropEnd(null);
-  }, [cropping, cropStart, cropEnd, selectedPage]);
+    },
+    [cropping, cropStart, cropEnd, selectedPage]
+  );
 
   const addProduct = () => {
     if (!croppedImage || !productForm.name || !productForm.price) return;
 
-    const newProduct: ExtractedProduct = {
+    onProductAdded({
       name: productForm.name,
       price: parseFloat(productForm.price),
       category: productForm.category,
       description: productForm.description || productForm.name,
       imageDataUrl: croppedImage,
-    };
+    });
 
-    setProducts((prev) => [...prev, newProduct]);
+    setAddedCount((c) => c + 1);
     setCroppedImage(null);
+    setCropping(true);
     setProductForm({ name: "", price: "", category: "General", description: "" });
-  };
-
-  const removeProduct = (index: number) => {
-    setProducts((prev) => prev.filter((_, i) => i !== index));
   };
 
   const selectionStyle =
@@ -246,7 +261,9 @@ export default function PdfImporter({ onProductsReady }: Props) {
               onClick={() => {
                 setPages([]);
                 setSelectedPage(null);
-                setProducts([]);
+                setCroppedImage(null);
+                setCropping(false);
+                setAddedCount(0);
               }}
               className="text-sm text-red-600 hover:text-red-700"
             >
@@ -259,8 +276,10 @@ export default function PdfImporter({ onProductsReady }: Props) {
                 key={i}
                 onClick={() => {
                   setSelectedPage(i);
-                  setCropping(false);
+                  setCropping(true);
                   setCroppedImage(null);
+                  setCropStart(null);
+                  setCropEnd(null);
                 }}
                 className={`flex-shrink-0 w-24 rounded-xl overflow-hidden border-2 transition-all ${
                   selectedPage === i
@@ -287,7 +306,11 @@ export default function PdfImporter({ onProductsReady }: Props) {
         <div className="bg-white rounded-2xl border border-warm-200 overflow-hidden">
           <div className="flex items-center justify-between p-4 border-b border-warm-100">
             <p className="font-medium text-sm">
-              Página {selectedPage + 1} — {cropping ? "Dibuja un rectángulo sobre el producto" : "Selecciona un producto"}
+              {croppedImage
+                ? "Completa los datos del producto"
+                : cropping
+                ? "Dibuja un rectángulo sobre el producto"
+                : `Página ${selectedPage + 1}`}
             </p>
             {!croppedImage && (
               <button
@@ -302,158 +325,124 @@ export default function PdfImporter({ onProductsReady }: Props) {
               </button>
             )}
           </div>
-          <div
-            className={`relative ${cropping ? "cursor-crosshair" : ""}`}
-            onMouseDown={handleMouseDown}
-            onMouseMove={handleMouseMove}
-            onMouseUp={handleMouseUp}
-          >
-            <img
-              ref={imgRef}
-              src={pages[selectedPage]}
-              alt={`Página ${selectedPage + 1}`}
-              className="w-full select-none"
-              draggable={false}
-            />
-            {selectionStyle && (
-              <div
-                className="absolute border-2 border-accent-600 bg-accent-600/10 pointer-events-none"
-                style={selectionStyle}
+
+          {!croppedImage && (
+            <div
+              className={`relative ${cropping ? "cursor-crosshair" : ""}`}
+              style={cropping ? { touchAction: "none" } : undefined}
+              onMouseDown={handlePointerDown}
+              onMouseMove={handlePointerMove}
+              onMouseUp={handlePointerUp}
+              onTouchStart={handlePointerDown}
+              onTouchMove={handlePointerMove}
+              onTouchEnd={handlePointerUp}
+            >
+              <img
+                ref={imgRef}
+                src={pages[selectedPage]}
+                alt={`Página ${selectedPage + 1}`}
+                className="w-full select-none"
+                draggable={false}
               />
-            )}
-          </div>
+              {selectionStyle && (
+                <div
+                  className="absolute border-2 border-accent-600 bg-accent-600/10 pointer-events-none"
+                  style={selectionStyle}
+                />
+              )}
+            </div>
+          )}
+
+          {/* Product Form (after cropping) — inside the same card */}
+          {croppedImage && (
+            <div className="p-5 space-y-4">
+              <div className="flex gap-4 flex-col sm:flex-row">
+                <div className="flex-shrink-0">
+                  <img
+                    src={croppedImage}
+                    alt="Producto seleccionado"
+                    className="w-32 h-32 object-cover rounded-xl border-2 border-warm-200 shadow-sm"
+                  />
+                </div>
+                <div className="flex-1 space-y-3">
+                  <input
+                    type="text"
+                    placeholder="Nombre del producto *"
+                    value={productForm.name}
+                    onChange={(e) =>
+                      setProductForm((f) => ({ ...f, name: e.target.value }))
+                    }
+                    className="w-full px-3 py-2.5 rounded-xl border border-warm-200 text-sm focus:outline-none focus:ring-2 focus:ring-accent-500"
+                  />
+                  <div className="flex gap-2">
+                    <input
+                      type="number"
+                      placeholder="Precio *"
+                      value={productForm.price}
+                      onChange={(e) =>
+                        setProductForm((f) => ({ ...f, price: e.target.value }))
+                      }
+                      className="flex-1 px-3 py-2.5 rounded-xl border border-warm-200 text-sm focus:outline-none focus:ring-2 focus:ring-accent-500"
+                    />
+                    <select
+                      value={productForm.category}
+                      onChange={(e) =>
+                        setProductForm((f) => ({ ...f, category: e.target.value }))
+                      }
+                      className="flex-1 px-3 py-2.5 rounded-xl border border-warm-200 text-sm focus:outline-none focus:ring-2 focus:ring-accent-500 bg-white"
+                    >
+                      <option>General</option>
+                      <option>Perfumería</option>
+                      <option>Cuidado Corporal</option>
+                      <option>Maquillaje</option>
+                      <option>Cabello</option>
+                      <option>Skincare</option>
+                      <option>Kits</option>
+                    </select>
+                  </div>
+                  <input
+                    type="text"
+                    placeholder="Descripción (opcional)"
+                    value={productForm.description}
+                    onChange={(e) =>
+                      setProductForm((f) => ({ ...f, description: e.target.value }))
+                    }
+                    className="w-full px-3 py-2.5 rounded-xl border border-warm-200 text-sm focus:outline-none focus:ring-2 focus:ring-accent-500"
+                  />
+                  <div className="flex gap-2">
+                    <button
+                      onClick={addProduct}
+                      disabled={!productForm.name || !productForm.price}
+                      className="bg-accent-500 hover:bg-accent-600 disabled:bg-warm-300 text-white text-sm font-medium px-5 py-2.5 rounded-xl transition-colors"
+                    >
+                      Agregar producto
+                    </button>
+                    <button
+                      onClick={() => {
+                        setCroppedImage(null);
+                        setCropping(true);
+                      }}
+                      className="text-sm text-warm-600 hover:text-warm-800 px-3"
+                    >
+                      Recortar otra vez
+                    </button>
+                  </div>
+                </div>
+              </div>
+            </div>
+          )}
         </div>
       )}
 
       {/* Hidden canvas for cropping */}
       <canvas ref={canvasRef} className="hidden" />
 
-      {/* Product Form (after cropping) */}
-      {croppedImage && (
-        <div className="bg-accent-50 rounded-2xl p-5 border border-accent-200">
-          <h3 className="font-semibold mb-4 text-accent-800">
-            Agregar producto
-          </h3>
-          <div className="flex gap-4 flex-col sm:flex-row">
-            <div className="flex-shrink-0">
-              <img
-                src={croppedImage}
-                alt="Producto seleccionado"
-                className="w-32 h-32 object-cover rounded-xl border-2 border-white shadow-sm"
-              />
-            </div>
-            <div className="flex-1 space-y-3">
-              <input
-                type="text"
-                placeholder="Nombre del producto"
-                value={productForm.name}
-                onChange={(e) =>
-                  setProductForm((f) => ({ ...f, name: e.target.value }))
-                }
-                className="w-full px-3 py-2.5 rounded-xl border border-warm-200 text-sm focus:outline-none focus:ring-2 focus:ring-accent-500"
-              />
-              <div className="flex gap-2">
-                <input
-                  type="number"
-                  placeholder="Precio"
-                  value={productForm.price}
-                  onChange={(e) =>
-                    setProductForm((f) => ({ ...f, price: e.target.value }))
-                  }
-                  className="flex-1 px-3 py-2.5 rounded-xl border border-warm-200 text-sm focus:outline-none focus:ring-2 focus:ring-accent-500"
-                />
-                <select
-                  value={productForm.category}
-                  onChange={(e) =>
-                    setProductForm((f) => ({ ...f, category: e.target.value }))
-                  }
-                  className="flex-1 px-3 py-2.5 rounded-xl border border-warm-200 text-sm focus:outline-none focus:ring-2 focus:ring-accent-500 bg-white"
-                >
-                  <option>General</option>
-                  <option>Perfumería</option>
-                  <option>Cuidado Corporal</option>
-                  <option>Maquillaje</option>
-                  <option>Cabello</option>
-                  <option>Skincare</option>
-                  <option>Kits</option>
-                </select>
-              </div>
-              <input
-                type="text"
-                placeholder="Descripción (opcional)"
-                value={productForm.description}
-                onChange={(e) =>
-                  setProductForm((f) => ({ ...f, description: e.target.value }))
-                }
-                className="w-full px-3 py-2.5 rounded-xl border border-warm-200 text-sm focus:outline-none focus:ring-2 focus:ring-accent-500"
-              />
-              <div className="flex gap-2">
-                <button
-                  onClick={addProduct}
-                  disabled={!productForm.name || !productForm.price}
-                  className="bg-accent-500 hover:bg-accent-600 disabled:bg-warm-300 text-white text-sm font-medium px-5 py-2.5 rounded-xl transition-colors"
-                >
-                  Agregar
-                </button>
-                <button
-                  onClick={() => {
-                    setCroppedImage(null);
-                    setCropping(true);
-                  }}
-                  className="text-sm text-warm-600 hover:text-warm-800 px-3"
-                >
-                  Recortar otra vez
-                </button>
-              </div>
-            </div>
-          </div>
-        </div>
-      )}
-
-      {/* Products List */}
-      {products.length > 0 && (
-        <div>
-          <div className="flex items-center justify-between mb-3">
-            <h3 className="font-semibold">
-              Productos extraídos ({products.length})
-            </h3>
-            <button
-              onClick={() => onProductsReady(products)}
-              className="bg-accent-500 hover:bg-accent-600 text-white text-sm font-semibold px-6 py-2.5 rounded-xl transition-colors"
-            >
-              Agregar {products.length} productos al catálogo
-            </button>
-          </div>
-          <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-3">
-            {products.map((product, i) => (
-              <div
-                key={i}
-                className="bg-white rounded-xl border border-warm-200 overflow-hidden group"
-              >
-                <div className="relative aspect-square">
-                  <img
-                    src={product.imageDataUrl}
-                    alt={product.name}
-                    className="w-full h-full object-cover"
-                  />
-                  <button
-                    onClick={() => removeProduct(i)}
-                    className="absolute top-2 right-2 w-7 h-7 bg-red-500 text-white rounded-full flex items-center justify-center text-xs opacity-0 group-hover:opacity-100 transition-opacity"
-                  >
-                    X
-                  </button>
-                </div>
-                <div className="p-3">
-                  <p className="text-xs font-medium truncate">{product.name}</p>
-                  <p className="text-sm font-bold text-accent-600">
-                    ${product.price.toLocaleString("es-CO")}
-                  </p>
-                  <p className="text-[10px] text-warm-500">{product.category}</p>
-                </div>
-              </div>
-            ))}
-          </div>
-        </div>
+      {/* Added count feedback */}
+      {addedCount > 0 && !croppedImage && (
+        <p className="text-sm text-secondary-700 bg-secondary-50 rounded-xl px-4 py-3 text-center font-medium">
+          {addedCount} producto{addedCount !== 1 ? "s" : ""} agregado{addedCount !== 1 ? "s" : ""} desde el PDF.
+          Selecciona otra imagen del PDF o avanza al siguiente paso.
+        </p>
       )}
     </div>
   );

@@ -109,18 +109,19 @@ export default function NewCatalogPage() {
     setImporting(false);
   };
 
-  const handlePdfProducts = (
-    pdfProducts: { name: string; price: number; category: string; description: string; imageDataUrl: string }[]
+  const handlePdfProductAdded = (
+    p: { name: string; price: number; category: string; description: string; imageDataUrl: string }
   ) => {
-    const mapped: StagedProduct[] = pdfProducts.map((p) => ({
-      name: p.name,
-      price: p.price,
-      category: p.category,
-      description: p.description,
-      image: p.imageDataUrl,
-    }));
-    setProducts((prev) => [...prev, ...mapped]);
-    setShowImporter(false);
+    setProducts((prev) => [
+      ...prev,
+      {
+        name: p.name,
+        price: p.price,
+        category: p.category,
+        description: p.description,
+        image: p.imageDataUrl,
+      },
+    ]);
   };
 
   const removeProduct = (idx: number) => {
@@ -390,7 +391,7 @@ export default function NewCatalogPage() {
                 {/* PDF importer */}
                 {importMethod === "pdf" && (
                   <div className="border-t border-warm-100 pt-5">
-                    <PdfImporter onProductsReady={handlePdfProducts} />
+                    <PdfImporter onProductAdded={handlePdfProductAdded} />
                   </div>
                 )}
 
